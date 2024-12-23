@@ -9,22 +9,8 @@ using System.Data;
 using Oracle.ManagedDataAccess.Client;
 using PaintManager;
 using System.Linq.Expressions;
-
-//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-//using Prop = CadModelProperties.Resources.ResIproperties;
-//using InvApp;
-//using InvUtils;
-//using WConnectorModels;
-//using ConnectorDataBase;
-//using BomCore;
-//using ConnectorDataBase.Json;
-//using WConnector.Resources;
-//using WUtils;
-//using DescriptionManager;
-//using WReplaceComponent;
-//using PaintManager;
-// ReSharper disable once LocalizableElement
-
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using ConnectorDataBase.Json;
 
 //http://192.168.50.213/webportal/ErpData
 
@@ -32,111 +18,161 @@ namespace IdugelErpIntegrator
 {
     public partial class MainErpConnUi : Form
     {
+        private bool NeedSaveToNewAge;
+        private PartPaint partPaint;
+        private PaintHelper paintHelper;
+        private LoadPaintData paintData;
+
+       // private CadProperties.CadModelProperties _iProperties;
+
+
         public MainErpConnUi()
         {
             InitializeComponent();
+            MainWindowsInitialize();
         }
-        private void MainErpConnUi_Load(object sender, EventArgs e)
-        {
-            OracleHelper.GetConnection();
-        
-            // DELEGATES
-            txtEspessura.KeyPress += NumericTextBox_KeyPress;
-            txtFatorUnidade.KeyPress += NumericTextBox_KeyPress;
 
+        private void MainWindowsInitialize()
+        {
+            //VerifyDocSelected();
+            partPaint = new PartPaint();
+            paintHelper = new PaintHelper();
+            paintData = new LoadPaintData();
+            //InitializeDataGrid();
+            //_iProperties = new CadProperties.CadModelProperties();
+            //dataNewAge = new NEWAGE();
+            NamesAutoComplete();
+            //dataNewAge = ErpData.FirstOrDefault(d => d.CODIGO == _iProperties.MpCod);
+        }
+
+        private void NamesAutoComplete()
+        {
+            // definição dos TextBox do Nomes
+            AutoCompleteStringCollection collection = new AutoCompleteStringCollection();
+            collection.AddRange(AppConfig.GetNames().ToArray());
+            
+            txtProp_RP_NomeDesenhista.AutoCompleteCustomSource = collection;
+            txtProp_RP_NomeProjetista.AutoCompleteCustomSource = collection;
+            txtProp_RP_NomeAprovador.AutoCompleteCustomSource = collection;
+        }
+
+        private async void MainErpConnUi_Load(object sender, EventArgs e)
+        {
+            // Load connection asynchronously to avoid blocking UI
+
+            if (OracleHelper.GetConnection())
+                this.Text = this.Text + " -  CONECTADO";
+            //await Task.Run(() => OracleHelper.GetConnection());
+
+            // Set up event handlers
+            txtEspessura.KeyPress += ValidateNumericTextBox_KeyPress;
+            txtFatorUnidade.KeyPress += ValidateNumericTextBox_KeyPress;
+
+            txtEspessura.TextChanged += ChangeValueMP_TextChanged;
+            txtFatorUnidade.TextChanged += ChangeValueMP_TextChanged;
+            txtDescInventor.TextChanged += ChangeValueMP_TextChanged;
+            TxtUnidades.TextChanged += ChangeValueMP_TextChanged;
+
+            // Set tooltips and populate UI
             DicaParaTextsBox.SetToolTip(this.txtFatorUnidade, "Usar virgula para separador decimais");
+            NeedSaveToNewAge = false;
             PreencherComboBoxUnidades();
-            CopiarPropriedades(txtProp_RP_NomeAprovador);
-            
+
+
         }
 
-        #region AÇÂO DOS BOTOES
-        /// <summary>
-        /// Clique no Botão
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnApplyMp_Click(object sender, EventArgs e)
+        #region Eventos
+
+        private void btnSaveMateriaPrimaToOracle_Click(object sender, EventArgs e)
         {
-            List<TextBox> TextBoxes = new List<TextBox> { txtDescInventor, txtEspessura, txtFatorUnidade };
-            
-            if (!ValidateEmptyTextBoxes(TextBoxes) || !ValidadeNumericTextBoxes(new List<TextBox> { txtEspessura, txtFatorUnidade }))  
-                return;
+            if (OracleHelper.connection.State == ConnectionState.Closed) return;
 
-
-
-
-            
-            string codigo = txtCod.Text; // Código do item selecionado
-            string descricaoInventor = txtDescInventor.Text;
-            double espessura;
-            double fatorUnidade;
-
-            if (!double.TryParse(txtEspessura.Text, out double _espessura))
+            if (!ValidateAndParseTextBox(txtEspessura, out double espessura, "Valor de espessura inválido") ||
+                !ValidateAndParseTextBox(txtFatorUnidade, out double fatorUnidade, "Valor de fator unidade inválido"))
             {
-                MessageBox.Show("Valor de espessura invalido");
                 return;
             }
-            else
-                espessura = _espessura;
 
-            if (!double.TryParse(txtFatorUnidade.Text, out double _fatorunidade))
-            {
-                MessageBox.Show("Valor de fator unidade invalido");
-                return;
-            }
-            else
-                fatorUnidade = _fatorunidade;
-
-
-            OracleHelper.AplicarMP(codigo, descricaoInventor, espessura, fatorUnidade);
+            // Aplicar lógica de negócios
+            OracleHelper.UpdateMateriaPrimaOnNewAge(txtCod.Text, txtDescInventor.Text, espessura, fatorUnidade);
+            NeedSaveToNewAge = false;
         }
-
-        public bool ValidadeNumericTextBoxes(List<TextBox> TextBoxes)
+        private void btnApplyMp_Click_Click(object sender, EventArgs e)
         {
-            if (TextBoxes.Any(x => x.Text.Contains('.')))
+            if (checkMpCustomData.Checked)
             {
-                MessageBox.Show("Os campos espessuras e fator de unidade não podem contem pontos (.)\nAs casas decimais devem ser separadas por virgula.");
-                return false;
+                DialogResult result = MessageBox.Show("A Matéria Prima está definida como CUSTOM.\n" +
+                                             "Deseja utilizar a Matéria Prima selecionada?", "Atenção",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.No)
+                    return;
+
             }
-            
-            foreach(TextBox textbox in TextBoxes)
+        
+            if (NeedSaveToNewAge)
             {
-                if (textbox.Text.StartsWith(","))
+                DialogResult Result = MessageBox.Show("Existem alterações não salvas no NewAge. Deseja Salvar as alterações?", "Salvar Alterações", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (Result == DialogResult.No) { return; }
+
+                if (OracleHelper.connection.State == ConnectionState.Closed)
                 {
-                    textbox.Text = "0" + textbox.Text;
+                    MessageBox.Show("Sem conexão com o NewAge");
+                    return;
                 }
+                btnSaveMateriaPrimaToOracle_Click(sender, e);
             }
+            PreencherTextBoxPropriedadesDadosMP();
+            checkMpCustomData.Checked = false;
 
-            return true;
-          
         }
-        private bool ValidateEmptyTextBoxes(List<TextBox> TextBoxes)
-        {           
-            if(TextBoxes.Any(x => string.IsNullOrWhiteSpace(x.Text)))
-            {
-                MessageBox.Show("Os campos: Descrição Inventor, Espessura e Fator Unidade não podem ser numlos\n" +
-                   "Por favor preencha as informações antes de salvar");
-                return false ;
-            }
-            return true ;
-        }
-        #endregion
-
-
-        #region CAPTURA DE EVENTOS
-
         private void TxtFinder_TextChanged(object sender, EventArgs e)
         {
             FiltrarDados();
         }
         private void dgView_SelectionChanged(object sender, EventArgs e)
         {
-            PreencherTextBoxMateriaPrima();
+            PreencherTextBoxComDadosDaMpFromNewAge();
+            NeedSaveToNewAge = false;
         }
+
+        #endregion
+
+        #region MetodosValidação
+
+        private void ChangeValueMP_TextChanged(object sender, EventArgs e)
+        {
+            NeedSaveToNewAge = true;
+        }
+        private void ValidateNumericTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Allow only numeric input, control keys, and comma for decimals
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && e.KeyChar != ',';
+        }
+        public bool ValidateAndParseTextBox(TextBox textBox, out double result, string errorMessage)
+        {
+            if (textBox.Text.StartsWith(","))
+            {
+                textBox.Text = "0" + textBox.Text;
+            }
+
+            if (!double.TryParse(textBox.Text, out result))
+            {
+                MessageBox.Show(errorMessage, "Erro de Validação", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
+        #endregion
+
+        #region MetodosAuxiliaresInterface
 
         private void FiltrarDados()
         {
+
+            if (OracleHelper.connection.State == ConnectionState.Closed) return;
+
             string txtFinder = TxtFinder.Text.Trim();
             if (txtFinder.Length <= 2)
                 dgView.DataSource = null;
@@ -159,19 +195,12 @@ namespace IdugelErpIntegrator
                 dgView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             }
         }
-
         private void PreencherComboBoxUnidades()
         {     
             List<string> unidades = OracleHelper.GetUnidades();
             TxtUnidades.Items.Clear(); // Limpa os itens anteriores
             TxtUnidades.Items.AddRange(unidades.ToArray());
         }
-
-
-
-        #endregion
-
-        #region Metodos 
         private void LimparTextBoxMP()
         {
             txtCod.Clear();
@@ -182,8 +211,10 @@ namespace IdugelErpIntegrator
             txtFatorUnidade.Clear();
             TxtUnidades.Text = string.Empty;
             
+            
+            
         }
-        private void PreencherTextBoxMateriaPrima()
+        private void PreencherTextBoxComDadosDaMpFromNewAge()
         {
             if (dgView.SelectedRows.Count > 0)
             {
@@ -202,75 +233,21 @@ namespace IdugelErpIntegrator
             else
                 LimparTextBoxMP();
         }
-        private void CopiarPropriedades(TextBox textBox)
+
+        private void PreencherTextBoxPropriedadesDadosMP()
         {
-            // Criar um novo ComboBox
-            ComboBox comboBox = new ComboBox();
-
-            // Copiar a posição e o tamanho do TextBox
-            comboBox.Location = textBox.Location;
-            comboBox.Size = textBox.Size;
-
-            // Copiar propriedades visuais do TextBox para o ComboBox
-            comboBox.BackColor = textBox.BackColor;
-            comboBox.ForeColor = textBox.ForeColor;
-            comboBox.Font = textBox.Font;
-            comboBox.Text = textBox.Text;
-
-            // Definir estilo do ComboBox (opcional: DropDown para permitir digitação, DropDownList para seleção somente)
-            comboBox.DropDownStyle = ComboBoxStyle.DropDown; // Permite digitação
-
-            // Adicionar os itens desejados no ComboBox (exemplo)
-            comboBox.Items.Add("Aprovador 1");
-            comboBox.Items.Add("Aprovador 2");
-            comboBox.Items.Add("Aprovador 3");
-
-            // Adicionar o ComboBox ao formulário
-            //this.Controls.Add(comboBox);
-
-
-            // Remover o TextBox do formulário
-            this.Controls.Remove(textBox);
-
+            txtProp_MP_Cod.Text = txtCod.Text;
+            txtProp_MP_DescERP.Text = txtDescErp.Text;
+            txtProp_MP_DescInventor.Text= txtDescInventor.Text;
+            txtProp_MP_Espessura.Text= txtEspessura.Text;
+            txtProp_MP_Familia.Text= txtFamilia.Text;
+            txtProp_MP_FatorUnidade.Text= txtFatorUnidade.Text;
+            txtProp_MP_Unidade.Text= TxtUnidades.Text;
 
         }
         #endregion
 
-
-        // Evento KeyPress compartilhado
-        private void NumericTextBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            ValidateNumericInput(sender as TextBox, e);
-        }
-
-
-        // Método de validação centralizado
-        private void ValidateNumericInput(TextBox textBox, KeyPressEventArgs e)
-        {
-            if (textBox == null) return;
-
-            // Permitir teclas de controle (como Backspace)
-            if (char.IsControl(e.KeyChar))
-                return;
-
-            // Permitir números e vírgula como separador decimal
-            if (char.IsDigit(e.KeyChar) || e.KeyChar == ',')
-            {
-                // Impedir múltiplas vírgulas
-                if (e.KeyChar == ',' && textBox.Text.Contains(","))
-                    e.Handled = true;
-
-                return;
-            }
-
-            // Bloqueia qualquer outro caractere
-            e.Handled = true;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-        }
+       
     }
 
 }
@@ -741,7 +718,7 @@ namespace IdugelErpIntegrator
 //    ///     Evento do Datagrid para carregamento nos textbox da linnha selecionada
 //    /// </summary>
 //    /// <param name="e"></param>
-//    private void PreencherTextBoxMateriaPrima(DataGridViewCellEventArgs e)
+//    private void PreencherTextBoxComDadosDaMpFromNewAge(DataGridViewCellEventArgs e)
 //    {
 //        LimparTextBoxMP();
 
@@ -920,7 +897,7 @@ namespace IdugelErpIntegrator
 //    /// <param name="e"></param>
 //    private void dgView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
 //    {
-//        PreencherTextBoxMateriaPrima(e);
+//        PreencherTextBoxComDadosDaMpFromNewAge(e);
 //    }
 
 //    /// <summary>
@@ -2278,4 +2255,37 @@ namespace IdugelErpIntegrator
 //    {
 //        txtProp_PC_NumRevisao.Clear();
 //    }
+//}
+
+//private void CopiarPropriedades(TextBox textBox)
+//{
+//    // Criar um novo ComboBox
+//    ComboBox comboBox = new ComboBox();
+
+//    // Copiar a posição e o tamanho do TextBox
+//    comboBox.Location = textBox.Location;
+//    comboBox.Size = textBox.Size;
+
+//    // Copiar propriedades visuais do TextBox para o ComboBox
+//    comboBox.BackColor = textBox.BackColor;
+//    comboBox.ForeColor = textBox.ForeColor;
+//    comboBox.Font = textBox.Font;
+//    comboBox.Text = textBox.Text;
+
+//    // Definir estilo do ComboBox (opcional: DropDown para permitir digitação, DropDownList para seleção somente)
+//    comboBox.DropDownStyle = ComboBoxStyle.DropDown; // Permite digitação
+
+//    // Adicionar os itens desejados no ComboBox (exemplo)
+//    comboBox.Items.Add("Aprovador 1");
+//    comboBox.Items.Add("Aprovador 2");
+//    comboBox.Items.Add("Aprovador 3");
+
+//    // Adicionar o ComboBox ao formulário
+//    //this.Controls.Add(comboBox);
+
+
+//    // Remover o TextBox do formulário
+//    this.Controls.Remove(textBox);
+
+
 //}

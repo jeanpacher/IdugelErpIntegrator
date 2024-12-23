@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+
+  <assemblyIdentity name="InvApp" version="1.0.0.0"></assemblyIdentity>
+
+  <clrClass clsid="{a38751c2-a17d-4285-8910-add752487a8f}" progid="InvApp.StandardAddInServer" threadingModel="Both" name="InvApp.StandardAddInServer" runtimeVersion=""></clrClass>
+
+  <file name="InvApp.dll" hashalg="SHA1"></file>
+
+</assembly>

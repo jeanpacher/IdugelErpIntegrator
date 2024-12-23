@@ -14,9 +14,7 @@ namespace IdugelErpIntegrator
 {
     public static class OracleHelper
     {
-        public static OracleConnection connection;
-
-
+        public static OracleConnection connection = null;
         public static bool GetConnection()
         {
             try
@@ -196,13 +194,16 @@ namespace IdugelErpIntegrator
 
             return descricao;
         }
-        public static void AplicarMP(string codigo, string descricaoInventor, double espessura, double fatorUnidade)
+        public static void UpdateMateriaPrimaOnNewAge(string codigo, string descricaoInventor, double espessura, double fatorUnidade)
         {
-
-            using (OracleCommand cmd = new OracleCommand())
+            
+            try
             {
-                cmd.Connection = OracleHelper.connection;
-                cmd.CommandText = @"
+
+                using (OracleCommand cmd = new OracleCommand())
+                {
+                    cmd.Connection = OracleHelper.connection;
+                    cmd.CommandText = @"
                                         MERGE INTO GERAL_INVENTOR gi
                                         USING (SELECT :codigo AS CODIGO FROM DUAL) src
                                         ON (gi.CODIGO = src.CODIGO)
@@ -212,15 +213,26 @@ namespace IdugelErpIntegrator
                                             INSERT (CODIGO, DESCINV, ESPMP, FATORUN) 
                                             VALUES (:codigo, :descricaoInventor, :espessura, :fatorUnidade)";
 
-                cmd.Parameters.Add(new OracleParameter("codigo", codigo));
-                cmd.Parameters.Add(new OracleParameter("descricaoInventor", descricaoInventor));
-                cmd.Parameters.Add(new OracleParameter("espessura", espessura));
-                cmd.Parameters.Add(new OracleParameter("fatorUnidade", fatorUnidade));
+                    cmd.Parameters.Add(new OracleParameter("codigo", codigo));
+                    cmd.Parameters.Add(new OracleParameter("descricaoInventor", descricaoInventor));
+                    cmd.Parameters.Add(new OracleParameter("espessura", espessura));
+                    cmd.Parameters.Add(new OracleParameter("fatorUnidade", fatorUnidade));
 
-                cmd.ExecuteNonQuery();
+                    cmd.ExecuteNonQuery();
+                }
+                Logger.Log($"Matéria-prima atualizada: Código={codigo}, Espessura={espessura}, Fator Unidade={fatorUnidade}");
+                MessageBox.Show("Informações salvas com sucesso!");
             }
-
-            MessageBox.Show("Informações salvas com sucesso!");
+            catch (OracleException ex)
+            {
+                Logger.Log($"Erro ao atualizar matéria-prima: Não foi possivel acessar o banco de dados:{ex.Message}");
+                MessageBox.Show($"Erro ao acessar o banco de dados: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Erro Inexperado ao atualizar matéria-prima: {ex.Message}");
+                MessageBox.Show($"Erro inesperado: {ex.Message}");
+            }
 
         }
         public static List<string> GetUnidades()

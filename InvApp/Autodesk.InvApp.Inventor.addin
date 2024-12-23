@@ -1,0 +1,14 @@
+<Addin Type="Standard">
+  <!--Created for Autodesk Inventor Version 28.0-->
+  <ClassId>{a38751c2-a17d-4285-8910-add752487a8f}</ClassId>
+  <ClientId>{a38751c2-a17d-4285-8910-add752487a8f}</ClientId>
+  <DisplayName>NewAgeIntegration</DisplayName>
+  <Description>Plugin de integração com a base de dados do NewAge</Description>
+  <Assembly>C:\InventorCustomAddins\IdugelNewAgeIntegration\InventorServer\InvApp.dll</Assembly>
+  <LoadOnStartUp>1</LoadOnStartUp>
+  <UserUnloadable>1</UserUnloadable>
+  <Hidden>0</Hidden>
+  <SupportedSoftwareVersionGreaterThan>27..</SupportedSoftwareVersionGreaterThan>
+  <DataVersion>1</DataVersion>
+  <UserInterfaceVersion>1</UserInterfaceVersion>
+</Addin>

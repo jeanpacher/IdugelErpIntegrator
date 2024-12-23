@@ -1,0 +1,6 @@
+{
+  "AppPath": "F:\\Welinton\\VSProjects\\IdugelAddins\\Builds",
+  "AppSqlString": "Data Source=192.168.50.214\\IDUGEL_DB;Initial Catalog=IDUGEL_DB;User ID=erp;Password=tunecad",
+  "Names": [ "CARLOS", "CARLOS QUEVEDO", "CHARLES", "JOSÉ", "ROBERTO", "WELINTON" ],
+  "AppWebPortal": "http://eng01/webportal/"
+}

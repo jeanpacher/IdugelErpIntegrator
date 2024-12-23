@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C8949C7C-0BA7-4C67-9271-369302D50F99}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>PainManager</RootNamespace>
+    <RootNamespace>PaintManager</RootNamespace>
     <AssemblyName>PainManager</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\PaintManager\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -55,7 +55,10 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="LoadPaintData.cs" />
     <Compile Include="PaintAcabamento.cs" />
+    <Compile Include="PaintAcabamentoType.cs" />
+    <Compile Include="PaintGroupValues.cs" />
     <Compile Include="PaintHelper.cs" />
     <Compile Include="PaintType.cs" />
     <Compile Include="PartPaint.cs" />
@@ -69,6 +72,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="AcabamentosPintura.json" />
     <None Include="Properties\Settings.settings">
