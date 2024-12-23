@@ -1142,7 +1142,6 @@
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.FlatAppearance.BorderColor = System.Drawing.Color.MidnightBlue;
-            this.button1.Image = global::InvAddIn.Properties.Resources.BtnSaveCopyAs_Image;
             this.button1.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.button1.Location = new System.Drawing.Point(895, 512);
             this.button1.Name = "button1";
