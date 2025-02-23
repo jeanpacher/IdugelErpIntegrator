@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7EEDF00B-4FC0-4C27-9418-05D8E7B8830B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>WConnectorModels</RootNamespace>
+    <AssemblyName>WConnectorModels</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\WConnectorModels\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Autodesk.Inventor.Interop, Version=27.1.0.0, Culture=neutral, PublicKeyToken=d84147f8b4276564, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <HintPath>..\References\Inventor\Autodesk.Inventor.Interop.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppEvents.cs" />
+    <Compile Include="CalculaMateriaPrima.cs" />
+    <Compile Include="FavoritoModel.cs" />
+    <Compile Include="iLogicRuleNames.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>iLogicRuleNames.resx</DependentUpon>
+    </Compile>
+    <Compile Include="MigrateOldProperties.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UpdateBlank.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BomCore\BomCore.csproj">
+      <Project>{a6123640-5cfd-4501-8806-4e4ff5228d21}</Project>
+      <Name>BomCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ConnectorDataBase\ConnectorDataBase.csproj">
+      <Project>{839B7167-371B-400F-8E48-5FBF7E87CB69}</Project>
+      <Name>ConnectorDataBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DescriptionManager\DescriptionManager.csproj">
+      <Project>{e88f5596-be0f-482a-b0e9-8e7334646698}</Project>
+      <Name>DescriptionManager</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IdugelProperties\IdugelProperties.csproj">
+      <Project>{23e614eb-30bd-4a1d-bb60-8c545e280ee6}</Project>
+      <Name>IdugelProperties</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\InvApp\InvApp.csproj">
+      <Project>{22105905-3B8D-42A3-82FE-ABE23A207F64}</Project>
+      <Name>InvApp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\InvUtils\InvUtils.csproj">
+      <Project>{c9ea0a51-185b-489c-a4a2-a002aab9e3df}</Project>
+      <Name>InvUtils</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="iLogicRuleNames.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>iLogicRuleNames.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -9,8 +9,17 @@ using System.Data;
 using Oracle.ManagedDataAccess.Client;
 using PaintManager;
 using System.Linq.Expressions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ConnectorDataBase.Json;
+using InvUtils;
+using BomCore;
+using WUtils;
+using Prop = CadModelProperties.Resources.ResIproperties;
+using DescriptionManager;
+using WConnectorModels;
+
+
+
 
 //http://192.168.50.213/webportal/ErpData
 
@@ -23,15 +32,15 @@ namespace IdugelErpIntegrator
         private PaintHelper paintHelper;
         private LoadPaintData paintData;
 
-       // private CadProperties.CadModelProperties _iProperties;
-
+        private CadProperties.CadModelProperties _iProperties;
+        private Document _selectedDocument;
+        private bool _hasApplyMaterial;
 
         public MainErpConnUi()
         {
             InitializeComponent();
             MainWindowsInitialize();
         }
-
         private void MainWindowsInitialize()
         {
             //VerifyDocSelected();
@@ -39,23 +48,21 @@ namespace IdugelErpIntegrator
             paintHelper = new PaintHelper();
             paintData = new LoadPaintData();
             //InitializeDataGrid();
-            //_iProperties = new CadProperties.CadModelProperties();
+            _iProperties = new CadProperties.CadModelProperties();
             //dataNewAge = new NEWAGE();
             NamesAutoComplete();
             //dataNewAge = ErpData.FirstOrDefault(d => d.CODIGO == _iProperties.MpCod);
         }
-
         private void NamesAutoComplete()
         {
             // definição dos TextBox do Nomes
             AutoCompleteStringCollection collection = new AutoCompleteStringCollection();
             collection.AddRange(AppConfig.GetNames().ToArray());
-            
+
             txtProp_RP_NomeDesenhista.AutoCompleteCustomSource = collection;
             txtProp_RP_NomeProjetista.AutoCompleteCustomSource = collection;
             txtProp_RP_NomeAprovador.AutoCompleteCustomSource = collection;
         }
-
         private async void MainErpConnUi_Load(object sender, EventArgs e)
         {
             // Load connection asynchronously to avoid blocking UI
@@ -63,6 +70,28 @@ namespace IdugelErpIntegrator
             if (OracleHelper.GetConnection())
                 this.Text = this.Text + " -  CONECTADO";
             //await Task.Run(() => OracleHelper.GetConnection());
+
+            _hasApplyMaterial = false;
+            cbxProp_DT_TipoPintura.DataSource = paintHelper.PaintTypesList;
+
+            foreach (var acabamento in paintData.PaintAcabamentoList)
+            {
+                cbxProp_DT_PinturaAcabamento.Items.Add(acabamento);
+            }
+
+            var docVerified = VerifyDocSelected();
+
+            if (docVerified == null)
+            {
+                await LoadFormActionAsync();
+            }
+            else
+            {
+                await LoadFormActionAsync(docVerified);
+            }
+
+            partPaint = new PartPaint();
+
 
             // Set up event handlers
             txtEspessura.KeyPress += ValidateNumericTextBox_KeyPress;
@@ -78,11 +107,89 @@ namespace IdugelErpIntegrator
             NeedSaveToNewAge = false;
             PreencherComboBoxUnidades();
 
+            _selectedDocument = InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument;
+            lblFileName.Text = _selectedDocument.FullFileName.Split('\\').Last();
+
 
         }
 
-        #region Eventos
+        /// <summary>
+        ///     Método Load
+        /// </summary>
+        private async Task LoadFormActionAsync()
+        {
+            progressBar.Style = ProgressBarStyle.Marquee;
+            progressBar.MarqueeAnimationSpeed = 50;
 
+            TransactionManager trxManager = InvApp.StandardAddInServer.m_InvApp.TransactionManager;
+            Transaction trx =
+                trxManager.StartTransaction(InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument, "New Age Connector");
+
+            try
+            {
+                LoadDocument();
+
+                lblStatus.Text = "Carregando Dados da Peça...";
+
+                GetPropertiesToTextBox();
+
+                //Task getProper = new Task(GetPropertiesToTextBox);
+                //getProper.Start();
+                //await getProper;
+
+                lblStatus.Text = "Dados Carregados...";
+                trx.End();
+                lblStatus.Text = "";
+            }
+            catch (Exception ex)
+            {
+                trx.Abort();
+                InvMsg.Msg("Houveram erros no carregamnto dos dados para o Form.\n\n " + ex);
+                CoreLog.WriteLog($"Erros no carregamnto dos dados para o Form. \n\t{ex}");
+            }
+
+            progressBar.MarqueeAnimationSpeed = 0;
+            progressBar.Style = ProgressBarStyle.Blocks;
+            progressBar.Value = progressBar.Minimum;
+        }
+
+        /// <summary>
+        ///     Método Load
+        /// </summary>
+        private async Task LoadFormActionAsync(Document oDoc)
+        {
+            progressBar.Style = ProgressBarStyle.Marquee;
+            progressBar.MarqueeAnimationSpeed = 50;
+
+            TransactionManager trxManager = InvApp.StandardAddInServer.m_InvApp.TransactionManager;
+            Transaction trx =
+                trxManager.StartTransaction(InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument, "New Age Connector");
+
+            try
+            {
+                _selectedDocument = oDoc;
+                lblFileName.Text = oDoc.DisplayName;
+
+                lblStatus.Text = "Carregando Dados da Peça...";
+
+                await Task.Run(() => GetPropertiesToTextBox(oDoc));
+                lblStatus.Text = @"Dados Carregados...";
+                trx.End();
+                lblStatus.Text = "";
+            }
+            catch (Exception ex)
+            {
+                trx.Abort();
+                InvMsg.Msg("Houveram erros no carregamnto dos dados para o Form.\n\n " + ex);
+            }
+
+            progressBar.MarqueeAnimationSpeed = 0;
+            progressBar.Style = ProgressBarStyle.Blocks;
+            progressBar.Value = progressBar.Minimum;
+        }
+
+
+        #region Eventos
         private void btnSaveMateriaPrimaToOracle_Click(object sender, EventArgs e)
         {
             if (OracleHelper.connection.State == ConnectionState.Closed) return;
@@ -108,8 +215,10 @@ namespace IdugelErpIntegrator
                 if (result == DialogResult.No)
                     return;
 
+                checkMpCustomData.Checked = false;
             }
-        
+
+
             if (NeedSaveToNewAge)
             {
                 DialogResult Result = MessageBox.Show("Existem alterações não salvas no NewAge. Deseja Salvar as alterações?", "Salvar Alterações", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -122,12 +231,15 @@ namespace IdugelErpIntegrator
                 }
                 btnSaveMateriaPrimaToOracle_Click(sender, e);
             }
+
+
             PreencherTextBoxPropriedadesDadosMP();
-            checkMpCustomData.Checked = false;
+
+            ApplyMaterialExecution();
 
         }
         private void TxtFinder_TextChanged(object sender, EventArgs e)
-        {
+       {
             FiltrarDados();
         }
         private void dgView_SelectionChanged(object sender, EventArgs e)
@@ -135,15 +247,280 @@ namespace IdugelErpIntegrator
             PreencherTextBoxComDadosDaMpFromNewAge();
             NeedSaveToNewAge = false;
         }
-
-        #endregion
-
-        #region MetodosValidação
-
         private void ChangeValueMP_TextChanged(object sender, EventArgs e)
         {
             NeedSaveToNewAge = true;
         }
+        private void checkMpCustomData_CheckedChanged(object sender, EventArgs e)
+        {
+            LimparTextBoxMpPropriedades();
+            DefineReadWriteMpProperties(checkMpCustomData.Checked);
+
+            if (checkMpCustomData.Checked)
+            {
+                btnApplyMp.Enabled = false;
+                DicaParaTextsBox.Active = true;
+            }
+
+            else
+            {
+                btnApplyMp.Enabled = true;
+                DicaParaTextsBox.Active = false;
+
+            }
+        }
+        private void btnConectarNewAge_Click(object sender, EventArgs e)
+        {
+            if (OracleHelper.connection.State == ConnectionState.Closed)
+                this.Cursor = Cursors.WaitCursor;
+            if (OracleHelper.GetConnection())
+                this.Text = this.Text + " -  CONECTADO";
+
+            this.Cursor = Cursors.Default;
+        }
+        #endregion
+
+
+
+        #region Metodos Para Aplicar a MP
+
+        private void ApplyMaterialExecution()
+        {
+            if (ApplyMaterial()) return;
+
+            //InitializeDataGrid();
+
+            UpdateActiveFile();
+        }
+
+        private bool ApplyMaterial()
+        {
+            if (_selectedDocument == null)
+            {
+                InvMsg.Msg("Não há arquivo associado para aplicação do material. \n " +
+                           "Entre em contato com o Desenvolvedor.");
+                return true;
+            }
+
+            try
+            {
+
+
+                lblStatus.Text = "Aplicando dados no iProperties...";
+                ApplyPartData(_selectedDocument);
+
+                lblStatus.Text = "Verificando se foi aplicado Material...";
+                HasApplyMaterialCommand();
+
+                lblStatus.Text = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                InvMsg.Msg("Algum erro ocorreu no processo de aplicação do material \n" + ex);
+
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        ///     comando para aplicar dados dentro de uma Transaction
+        /// </summary>
+        private void ApplyPartData(Document oDoc)
+        {
+            TransactionManager trxManager = InvApp.StandardAddInServer.m_InvApp.TransactionManager;
+            Transaction trx = trxManager.StartTransaction(InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument, "ERP Connector Aplicar Dados");
+            try
+            {
+                SetProperties(oDoc);
+                if (oDoc.DocumentType == DocumentTypeEnum.kPartDocumentObject)
+                {
+                    if (InvSheetMetal.IsSheetMetalPart(oDoc as PartDocument))
+                    {
+                        SetSheetMetalThickness(oDoc as PartDocument);
+                    }
+                }
+                trx.End();
+
+            }
+            catch (Exception)
+            {
+                trx.Abort();
+            }
+        }
+
+        private static void UpdateActiveFile()
+        {
+            if (InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument.RequiresUpdate)
+            {
+                InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument.Update2(true);
+            }
+        }
+
+        private void SetProperties()
+        {
+            try
+            {
+                // Matéria Prima
+                InvProps.SetInvIProperties(Prop.MP_COD, txtCod.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.MP_FAMILIA, txtFamilia.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.MP_DESC_ERP, txtDescErp.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.MP_DESC_INVENTOR, txtDescInventor.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.MP_UNIDADE, TxtUnidades.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.MP_FATOR, txtFatorUnidade.Text.Replace('.', ',').Trim(),
+                    InvPropetiesGroup.CustomFields);
+
+                // Máquina
+                InvProps.SetInvIProperties(Prop.MQ_COD, txtProp_MQ_Cod.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.MQ_NOME, txtProp_MQ_Nome.Text, InvPropetiesGroup.CustomFields);
+
+                // Peça
+                InvProps.SetInvIProperties(Prop.PC_COD_DESENHO, txtProp_PC_CodDesenho.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.PC_DESC, txtProp_PC_Desc.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.PC_DESC_COMPLETA, txtProp_PC_DescCompleta.Text,
+                    InvPropetiesGroup.CustomFields);
+
+                InvProps.SetInvIProperties(Prop.PC_DESC_COMPLETA_CUSTOM, CheckState(checkPcDescCustom),
+                    InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.PC_NUM_REV, txtProp_PC_NumRevisao.Text,
+                    InvPropetiesGroup.InventorSumaryInformation);
+
+                // Desenhistas
+                InvProps.SetInvIProperties(Prop.NOME_APROVADOR, txtProp_RP_NomeAprovador.Text,
+                    InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.NOME_DESENHISTA, txtProp_RP_NomeDesenhista.Text,
+                    InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.NOME_PROJETISTA, txtProp_RP_NomeProjetista.Text,
+                    InvPropetiesGroup.CustomFields);
+
+                // BlankType
+                InvProps.SetInvIProperties(Prop.BLANK_TYPE, txtProp_DT_BlankType.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.MP_PESO_BRUTO, txtProp_DT_PesoBruto.Text, InvPropetiesGroup.CustomFields);
+
+                // Pintura
+                InvProps.SetInvIProperties(Prop.PC_TIPO_PINTURA, cbxProp_DT_TipoPintura.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.PC_AREA_PINTURA, txtProp_DT_AreaPintura.Text, InvPropetiesGroup.CustomFields);
+                InvProps.SetInvIProperties(Prop.PC_ACABAMENTO_PINTURA, cbxProp_DT_PinturaAcabamento.Text, InvPropetiesGroup.CustomFields);
+
+                InvProps.SetInvIProperties(Prop.PC_PINTURA_INTERNA_DIFERENTE, CheckState(checkPintura), InvPropetiesGroup.CustomFields);
+            }
+            catch (Exception ex)
+            {
+                CoreLog.WriteLog(
+                    $"--------" +
+                    $"Erro ao Aplicar Propriedades:\n -> " +
+                    $" {ex} <-\n " +
+                    $"\n-------"
+                );
+            }
+        }
+
+
+        /// <summary>
+        ///     Carrega os dados no iProperties
+        /// </summary>
+        private void SetProperties(Document oDoc)
+        {
+            try
+            {
+                // Matéria Prima
+                InvProps.SetInvIProperties(Prop.MP_CUSTOM, CheckState(checkMpCustomData), InvPropetiesGroup.CustomFields, oDoc);
+
+                InvProps.SetInvIProperties(Prop.MP_COD, txtProp_MP_Cod.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.MP_FAMILIA, txtProp_MP_Familia.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.MP_DESC_ERP, txtProp_MP_DescERP.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.MP_DESC_INVENTOR, txtProp_MP_DescInventor.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.MP_UNIDADE, txtProp_MP_Unidade.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.MP_FATOR, txtProp_MP_FatorUnidade.Text.Replace('.', ',').Trim(),
+                    InvPropetiesGroup.CustomFields, oDoc);
+
+                // Máquina
+                InvProps.SetInvIProperties(Prop.MQ_COD, txtProp_MQ_Cod.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.MQ_NOME, txtProp_MQ_Nome.Text, InvPropetiesGroup.CustomFields, oDoc);
+
+                // Peça
+                InvProps.SetInvIProperties(Prop.PC_COD_DESENHO, txtProp_PC_CodDesenho.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.PC_DESC, txtProp_PC_Desc.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.PC_DESC_COMPLETA, txtProp_PC_DescCompleta.Text,
+                    InvPropetiesGroup.CustomFields, oDoc);
+
+                InvProps.SetInvIProperties(Prop.PC_DESC_COMPLETA_CUSTOM, CheckState(checkPcDescCustom),
+                    InvPropetiesGroup.CustomFields, oDoc);
+
+                InvProps.SetInvIProperties(Prop.PC_NUM_REV, txtProp_PC_NumRevisao.Text,
+                    InvPropetiesGroup.InventorSumaryInformation, oDoc);
+
+                // Desenhistas
+                InvProps.SetInvIProperties(Prop.NOME_APROVADOR, txtProp_RP_NomeAprovador.Text,
+                    InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.NOME_DESENHISTA, txtProp_RP_NomeDesenhista.Text,
+                    InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.NOME_PROJETISTA, txtProp_RP_NomeProjetista.Text,
+                    InvPropetiesGroup.CustomFields, oDoc);
+
+                // BlankType
+                InvProps.SetInvIProperties(Prop.BLANK_TYPE, txtProp_DT_BlankType.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.MP_PESO_BRUTO, txtProp_DT_PesoBruto.Text, InvPropetiesGroup.CustomFields, oDoc);
+
+                // Pintura
+                InvProps.SetInvIProperties(Prop.PC_TIPO_PINTURA, cbxProp_DT_TipoPintura.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.PC_AREA_PINTURA, txtProp_DT_AreaPintura.Text, InvPropetiesGroup.CustomFields, oDoc);
+                InvProps.SetInvIProperties(Prop.PC_ACABAMENTO_PINTURA, cbxProp_DT_PinturaAcabamento.Text, InvPropetiesGroup.CustomFields, oDoc);
+
+                InvProps.SetInvIProperties(Prop.PC_PINTURA_INTERNA_DIFERENTE, CheckState(checkPintura), InvPropetiesGroup.CustomFields, oDoc);
+            }
+            catch (Exception ex)
+            {
+                CoreLog.WriteLog(
+                    $"--------" +
+                    $"Erro ao Aplicar Propriedades:\n -> " +
+                    $" {ex.ToString()} <-\n " +
+                    $"\n-------"
+                );
+            }
+
+        }
+
+
+        /// <summary>
+        ///     Define a espessura da chapa conforme a matéria prima
+        /// </summary>
+        private void SetSheetMetalThickness()
+        {
+            if (txtEspessura.Text == string.Empty)
+                return;
+
+            var value = txtEspessura.Text.ToDouble();
+            InvSheetMetal.SetThickness(value);
+        }
+
+        /// <summary>
+        ///     Define a espessura da chapa INFORMADA conforme a matéria prima
+        /// </summary>
+        private void SetSheetMetalThickness(PartDocument oDoc)
+        {
+            if (txtEspessura.Text == string.Empty)
+                return;
+
+            var value = txtEspessura.Text.ToDouble();
+            InvSheetMetal.SetThickness(value, oDoc);
+        }
+
+
+        /// <summary>
+        ///     Método para verificar se o material novo selecionad já foi aplicado
+        /// </summary>
+        private void HasApplyMaterialCommand()
+        {
+            _hasApplyMaterial = true;
+            lblAlert.Text = string.Empty;
+        }
+        #endregion
+
+
+        #region MetodosValidação
         private void ValidateNumericTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Allow only numeric input, control keys, and comma for decimals
@@ -164,10 +541,55 @@ namespace IdugelErpIntegrator
             return true;
         }
 
+        private Document VerifyDocSelected()
+        {
+
+            if (InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument.DocumentType == DocumentTypeEnum.kDrawingDocumentObject)
+            {
+                var drawDoc = InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument;
+                //var refFile = drawDoc.ReferencedFiles[0];
+
+                foreach (Document referencedFile in drawDoc.ReferencedFiles)
+                    try
+                    {
+                        var document = referencedFile;
+                        return document;
+                    }
+                    catch
+                    {
+                        InvMsg.Msg("Não contém arquivo de peça.");
+                    }
+                //var activeSheet = SheetHelper.GetActiveSheet();
+                //activeSheet.DrawingViews.
+            }
+
+            var selDoc = InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument.SelectSet;
+
+            if (selDoc.Count <= 0) return null;
+
+            foreach (var doc in selDoc)
+            {
+                try
+                {
+                    if (doc.GetType() is ComponentOccurrence)
+                    {
+
+                    ComponentOccurrence occur = (ComponentOccurrence)doc;
+                    return occur.Definition.Document as Document;
+                    }
+                }
+                catch (Exception e)
+                {
+                    CoreLog.WriteLog($"\n-----> Open Selected\n {e}");
+                }
+            }
+            return null;
+        }
+
         #endregion
 
-        #region MetodosAuxiliaresInterface
 
+        #region MetodosAuxiliaresInterface
         private void FiltrarDados()
         {
 
@@ -196,12 +618,23 @@ namespace IdugelErpIntegrator
             }
         }
         private void PreencherComboBoxUnidades()
-        {     
+        {
             List<string> unidades = OracleHelper.GetUnidades();
             TxtUnidades.Items.Clear(); // Limpa os itens anteriores
             TxtUnidades.Items.AddRange(unidades.ToArray());
         }
-        private void LimparTextBoxMP()
+
+        public void DefineReadWriteMpProperties(bool rw)
+        {
+            txtProp_MP_Familia.ReadOnly = !rw;
+            txtProp_MP_Unidade.ReadOnly = !rw;
+            txtProp_MP_Cod.ReadOnly = !rw;
+            txtProp_MP_Espessura.ReadOnly = !rw;
+            txtProp_MP_FatorUnidade.ReadOnly = !rw;
+            txtProp_MP_DescERP.ReadOnly = !rw;
+            txtProp_MP_DescInventor.ReadOnly = !rw;
+        }
+        private void LimparTextBoxMpDadosMP()
         {
             txtCod.Clear();
             txtDescErp.Clear();
@@ -210,9 +643,16 @@ namespace IdugelErpIntegrator
             txtEspessura.Clear();
             txtFatorUnidade.Clear();
             TxtUnidades.Text = string.Empty;
-            
-            
-            
+        }
+        private void LimparTextBoxMpPropriedades()
+        {
+            txtProp_MP_Familia.Clear();
+            txtProp_MP_Unidade.Clear();
+            txtProp_MP_Cod.Clear();
+            txtProp_MP_Espessura.Clear();
+            txtProp_MP_FatorUnidade.Clear();
+            txtProp_MP_DescERP.Clear();
+            txtProp_MP_DescInventor.Clear();
         }
         private void PreencherTextBoxComDadosDaMpFromNewAge()
         {
@@ -231,23 +671,474 @@ namespace IdugelErpIntegrator
 
             }
             else
-                LimparTextBoxMP();
+                LimparTextBoxMpDadosMP();
         }
-
         private void PreencherTextBoxPropriedadesDadosMP()
         {
             txtProp_MP_Cod.Text = txtCod.Text;
             txtProp_MP_DescERP.Text = txtDescErp.Text;
-            txtProp_MP_DescInventor.Text= txtDescInventor.Text;
-            txtProp_MP_Espessura.Text= txtEspessura.Text;
-            txtProp_MP_Familia.Text= txtFamilia.Text;
-            txtProp_MP_FatorUnidade.Text= txtFatorUnidade.Text;
-            txtProp_MP_Unidade.Text= TxtUnidades.Text;
+            txtProp_MP_DescInventor.Text = txtDescInventor.Text;
+            txtProp_MP_Espessura.Text = txtEspessura.Text;
+            txtProp_MP_Familia.Text = txtFamilia.Text;
+            txtProp_MP_FatorUnidade.Text = txtFatorUnidade.Text;
+            txtProp_MP_Unidade.Text = TxtUnidades.Text;
 
         }
+
+        /// <summary>
+        ///     Método para limpar todos os textbox
+        /// </summary>
+        private void ClearAllTextBox()
+        {
+            foreach (Control control in Controls)
+                if (control is TextBox)
+                    ((TextBox)control).Text = string.Empty;
+                else if (control is ComboBox)
+                    ((ComboBox)control).Text = string.Empty;
+                else if (control is DataGridView)
+                    ((DataGridView)control).Rows.Clear();
+        }
+
         #endregion
 
+        private void MainErpConnUi_HelpButtonClicked(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ClearAllTextBox();
+        }
+
+
+        #region Manipulação arquivos do Inventor
+
+        private void LoadDocument()
+        {
+            _selectedDocument = InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument;
+
+            lblFileName.Text = _selectedDocument.DisplayName;
+
+            if (_selectedDocument.DocumentType != DocumentTypeEnum.kPartDocumentObject) return;
+
+            btnSelectDoc.Enabled = false;
+            btnGetThisDoc.Enabled = false;
+            BtnSaveAndReplace.Enabled = false;
+            BtnReplaceAllInStructure.Enabled = false;
+
+        }
+
+        /// <summary>
+        ///     Carrega os dados do iProperties para os TextBox
+        /// </summary>
+        private void GetPropertiesToTextBox()
+        {
+            _iProperties.GetAllCadModelProperties();
+
+            if (_iProperties != null)
+            {
+                //
+                // TextBox Dados MP Aba1
+                // Verifica se a propriedade MP_CUSTOM é falsa
+                if (_iProperties.MpCustom == "0")
+                {
+                    checkMpCustomData.Checked = false;
+                    TxtBox.SetToTextBox(txtCod, _iProperties.MpCod);
+                    TxtBox.SetToTextBox(txtFamilia, _iProperties.MpFamilia);
+                    TxtBox.SetToTextBox(txtDescErp, _iProperties.MpDescErp);
+                    TxtBox.SetToTextBox(txtDescInventor, _iProperties.MpDescInventor);
+                    TxtBox.SetToComboBox(TxtUnidades, _iProperties.MpUnidade);
+                    TxtBox.SetToTextBox(txtFatorUnidade, _iProperties.MpFator);
+                }
+                else
+                {
+                    checkMpCustomData.Checked = true;
+                }
+
+                //
+                // Matéria Prima Aba Propriedades
+                //
+                TxtBox.SetToTextBox(txtProp_MP_Cod, _iProperties.MpCod);
+                TxtBox.SetToTextBox(txtProp_MP_Familia, _iProperties.MpFamilia);
+                TxtBox.SetToTextBox(txtProp_MP_DescERP, _iProperties.MpDescErp);
+                TxtBox.SetToTextBox(txtProp_MP_DescInventor, _iProperties.MpDescInventor);
+                TxtBox.SetToTextBox(txtProp_MP_Unidade, _iProperties.MpUnidade);
+                TxtBox.SetToTextBox(txtProp_MP_FatorUnidade, _iProperties.MpFator);
+
+                //
+                // Dados Equipamento
+                //
+                TxtBox.SetToTextBox(txtProp_MQ_Cod, _iProperties.MqCodigo);
+                TxtBox.SetToTextBox(txtProp_MQ_Nome, _iProperties.MqNome);
+
+                //
+                // Dados da Peça
+                //
+                //TxtBox.SetToTextBox(txtProp_PC_Nome, _iProperties.PcNome);
+                //TxtBox.SetToTextBox(txtProp_PC_NumDesenho, _iProperties.PcNumDesenho);
+                TxtBox.SetToTextBox(txtProp_PC_CodDesenho, _iProperties.PcCodDesenho);
+                TxtBox.SetToTextBox(txtProp_PC_Desc, _iProperties.PcDesc);
+                TxtBox.SetToTextBox(txtProp_PC_DescCompleta, _iProperties.PcDescCompleta);
+                TxtBox.SetToTextBox(txtProp_PC_NumRevisao, _iProperties.PcNumRev);
+
+                // Propriedade Bool
+                checkPcDescCustom.Checked = CheckState(_iProperties.PcDescCompletaCustom);
+
+                //
+                // Dados Projetista
+                //
+                TxtBox.SetToTextBox(txtProp_RP_NomeAprovador, _iProperties.RpNomeAprovador);
+                TxtBox.SetToTextBox(txtProp_RP_NomeDesenhista, _iProperties.RpNomeDesenhista);
+                TxtBox.SetToTextBox(txtProp_RP_NomeProjetista, _iProperties.RpNomeProjetista);
+
+                // 
+                // Dados Técnicos
+                //
+                TxtBox.SetToTextBox(txtProp_DT_PesoAcabado, _iProperties.DtPesoAcabado);
+                TxtBox.SetToTextBox(txtProp_DT_PesoBruto, _iProperties.PcPesoBruto);
+                TxtBox.SetToTextBox(txtProp_DT_DimBlank, _iProperties.PcDimBlank);
+                TxtBox.SetToTextBox(txtProp_DT_BlankType, _iProperties.BlankType);
+
+                //
+                // Pintura
+                TxtBox.SetToTextBox(txtProp_DT_AreaPintura, _iProperties.PcPinturaArea);
+                cbxProp_DT_TipoPintura.SelectedIndex = cbxProp_DT_TipoPintura.FindStringExact(_iProperties.PcPinturaTipo);
+                checkPintura.Checked = CheckState(_iProperties.PcPinturaInternaDiferente);
+                cbxProp_DT_PinturaAcabamento.SelectedIndex =
+                    cbxProp_DT_PinturaAcabamento.FindStringExact(_iProperties.PcPinturaAcabamento);
+
+                //
+                // Coleta a espessura da peça se for um SheetMetal
+                if (!InvSheetMetal.IsSheetMetalPart())
+                {
+                    //return true;
+                }
+                else
+                {
+                    VerificaDefineEspessura();
+                }
+
+            }
+            else
+            {
+                //return false;
+            }
+
+        }
+
+        private void GetPropertiesToTextBox(Document oDoc)
+        {
+            _iProperties = _iProperties.GetAllCadModelProperties(oDoc);
+
+            if (_iProperties != null)
+            {
+                LoadDataToControls(_iProperties);
+            }
+        }
+
+
+        /// <summary>
+        /// Carregamento de dados para o Form
+        /// </summary>
+        /// <param name="_iProperties"></param>
+        private void LoadDataToControls(CadProperties.CadModelProperties _iProperties)
+        {
+            try
+            {
+                TxtBox.SetToTextBox(txtCod, _iProperties.MpCod);
+                TxtBox.SetToTextBox(txtFamilia, _iProperties.MpFamilia);
+                TxtBox.SetToTextBox(txtDescErp, _iProperties.MpDescErp);
+                TxtBox.SetToTextBox(txtDescInventor, _iProperties.MpDescInventor);
+                TxtBox.SetToComboBox(TxtUnidades, _iProperties.MpUnidade);
+                TxtBox.SetToTextBox(txtFatorUnidade, _iProperties.MpFator);
+
+                //
+                // Matéria Prima Aba Propriedades
+                //
+                TxtBox.SetToTextBox(txtProp_MP_Cod, _iProperties.MpCod);
+                TxtBox.SetToTextBox(txtProp_MP_Familia, _iProperties.MpFamilia);
+                TxtBox.SetToTextBox(txtProp_MP_DescERP, _iProperties.MpDescErp);
+                TxtBox.SetToTextBox(txtProp_MP_DescInventor, _iProperties.MpDescInventor);
+                TxtBox.SetToTextBox(txtProp_MP_Unidade, _iProperties.MpUnidade);
+                TxtBox.SetToTextBox(txtProp_MP_FatorUnidade, _iProperties.MpFator);
+
+                //
+                // Dados Equipamento
+                //
+                TxtBox.SetToTextBox(txtProp_MQ_Cod, _iProperties.MqCodigo);
+                TxtBox.SetToTextBox(txtProp_MQ_Nome, _iProperties.MqNome);
+
+                //
+                // Dados da Peça
+                //
+                TxtBox.SetToTextBox(txtProp_PC_CodDesenho, _iProperties.PcCodDesenho);
+                TxtBox.SetToTextBox(txtProp_PC_Desc, _iProperties.PcDesc);
+                TxtBox.SetToTextBox(txtProp_PC_DescCompleta, _iProperties.PcDescCompleta);
+                TxtBox.SetToTextBox(txtProp_PC_NumRevisao, _iProperties.PcNumRev);
+
+                // Propriedade Bool
+                checkPcDescCustom.Checked = CheckState(_iProperties.PcDescCompletaCustom);
+
+                //
+                // Dados Projetista
+                //
+                TxtBox.SetToTextBox(txtProp_RP_NomeAprovador, _iProperties.RpNomeAprovador);
+                TxtBox.SetToTextBox(txtProp_RP_NomeDesenhista, _iProperties.RpNomeDesenhista);
+                TxtBox.SetToTextBox(txtProp_RP_NomeProjetista, _iProperties.RpNomeProjetista);
+
+                // 
+                // Dados Técnicos
+                //
+                TxtBox.SetToTextBox(txtProp_DT_PesoAcabado, _iProperties.DtPesoAcabado);
+                TxtBox.SetToTextBox(txtProp_DT_PesoBruto, _iProperties.PcPesoBruto);
+                TxtBox.SetToTextBox(txtProp_DT_DimBlank, _iProperties.PcDimBlank);
+                TxtBox.SetToTextBox(txtProp_DT_BlankType, _iProperties.BlankType);
+
+                //
+                // Pintura
+                TxtBox.SetToTextBox(txtProp_DT_AreaPintura, _iProperties.PcPinturaArea);
+                cbxProp_DT_TipoPintura.SelectedIndex =
+                    cbxProp_DT_TipoPintura.FindStringExact(_iProperties.PcPinturaTipo);
+                checkPintura.Checked = CheckState(_iProperties.PcPinturaInternaDiferente);
+                cbxProp_DT_PinturaAcabamento.SelectedIndex =
+                    cbxProp_DT_PinturaAcabamento.FindStringExact(_iProperties.PcPinturaAcabamento);
+
+                //
+                // Coleta a espessura da peça se for um SheetMetal
+                if (!InvSheetMetal.IsSheetMetalPart())
+                    return;
+
+                VerificaDefineEspessura();
+            }
+            catch (Exception ex)
+            {
+                CoreLog.WriteLog(
+                    $"--------" +
+                    $"Erro ao recuperar Propriedades:\n -> " +
+                    $" {ex.ToString()} <-\n " +
+                    $"\n-------"
+                );
+            }
+        }
+
+        /// <summary>
+        /// Verifica as espessuras
+        /// </summary>
+        private void VerificaDefineEspessura()
+        {
+            try
+            {
+                var espessura = InvSheetMetal.GetThickness().ToString();
+
+                if (_iProperties.Thickness != 0)
+                {
+                    if (_iProperties.Thickness != InvSheetMetal.GetThickness())
+                    {
+                        InvMsg.Msg($"A espessura configurada da peça parece estar diferente da do material aplicado.\n\n" +
+                                   $"-> Espessura Configurada Inventor: ( {espessura} ).\n" +
+                                   $"-> Espessura do Material ERP: ( {_iProperties.Thickness} ).\n\n" +
+                                   $"Será aplicado a espessura configurada ( {espessura} )Verifique essas informaçãoes antes de finalizar a aplicação do material.");
+                    }
+                }
+
+                txtEspessura.Text = espessura;
+                txtProp_MP_Espessura.Text = espessura;
+            }
+            catch (Exception e)
+            {
+                CoreLog.WriteLog(e.ToString());
+                InvMsg.Msg($"Erro ao verificar a espessura! \n\n {e}");
+            }
+        }
+
+        /// <summary>
+        /// Update do Blank do arquivo Ativo
+        /// </summary>
+        private void BlankUpdate()
+        {
+            CoreDescription cd = new CoreDescription();
+
+            SetProperties();
+            txtProp_PC_DescCompleta.Text = UpdateBlank.Execute(txtProp_MP_Familia.Text);
+            txtProp_DT_BlankType.Text = cd.GetDescriptionType(txtProp_MP_Familia.Text);
+            CalculaMateriaPrima();
+        }
+
+        #endregion
+
+
+
+        /// <summary>
+        /// Verifica o Status do Checkbox
+        /// </summary>
+        /// <param name="checkBox"></param>
+        /// <returns></returns>
+        public string CheckState(CheckBox checkBox)
+        {
+            return checkBox.Checked ? "1" : "0";
+        }
+
+        /// <summary>
+        /// Verifica o Status do Checkbox
+        /// </summary>
+        /// <param name="checkBox"></param>
+        /// <returns></returns>
+        public bool CheckState(string checkBox)
+        {
+            if (checkBox.Equals("1"))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+        #region Dados de Pintura
+
+        /// <summary>
+        ///     Define valores de matéria prima para a peça
+        /// </summary>
+        private void CalculaMateriaPrima()
+        {
+            // Documento atual e Massa
+            PartDocument partDoc = (PartDocument)InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument;
+            MassProperties mass = partDoc.ComponentDefinition.MassProperties;
+
+            // Cria um BomData para coletar os dados necessários para Cálculo
+            BomData bc = new BomData
+            {
+                Blank = InvProps.GetInventorCustomProperties(Prop.CH_DIM_BLANK),
+                Fator = txtFatorUnidade.Text.Trim(),
+                PesoAcabado = Math.Round(Convert.ToDouble(mass.Mass), 2)
+            };
+
+
+            // Peso Bruto
+            if (txtProp_DT_BlankType.Text == BlankType.SheetMetal.ToString()) bc.BlankType = BlankType.SheetMetal;
+            if (txtProp_DT_BlankType.Text == BlankType.Cylinder.ToString()) bc.BlankType = BlankType.Cylinder;
+            if (txtProp_DT_BlankType.Text == BlankType.Linear.ToString()) bc.BlankType = BlankType.Linear;
+
+            bc.PesoBruto = BomCalc.Calcule(bc);
+
+            // Peso Bruto
+            TxtBox.SetToTextBox(txtProp_DT_PesoBruto, bc.PesoBruto + " KG");
+
+            // Blank
+            TxtBox.SetToTextBox(txtProp_DT_DimBlank, bc.Blank);
+
+            // Peso Acabado
+            TxtBox.SetToTextBox(txtProp_DT_PesoAcabado, bc.PesoAcabado + " KG");
+
+            // Salva nas propriedades
+            InvProps.SetInvIProperties(Prop.PC_PESO_ACABADO, txtProp_DT_PesoAcabado.Text,
+                InvPropetiesGroup.CustomFields);
+            InvProps.SetInvIProperties(Prop.MP_PESO_BRUTO, txtProp_DT_PesoBruto.Text, InvPropetiesGroup.CustomFields);
+        }
+
+        /// <summary>
+        ///     Define valores de matéria prima para a peça indicada
+        /// </summary>
+        private void CalculaMateriaPrima(Document oDoc)
+        {
+            // Documento atual e Massa
+            PartDocument partDoc = (PartDocument)oDoc;
+            MassProperties mass = partDoc.ComponentDefinition.MassProperties;
+
+            // Cria um BomData para coletar os dados necessários para Cálculo
+            BomData bc = new BomData
+            {
+                Blank = InvProps.GetInventorCustomProperties(Prop.CH_DIM_BLANK, oDoc),
+                Fator = txtFatorUnidade.Text.Trim(),
+                PesoAcabado = Math.Round(Convert.ToDouble(mass.Mass), 2)
+            };
+
+            // Peso Bruto
+            if (txtProp_DT_BlankType.Text == BlankType.SheetMetal.ToString()) bc.BlankType = BlankType.SheetMetal;
+            if (txtProp_DT_BlankType.Text == BlankType.Cylinder.ToString()) bc.BlankType = BlankType.Cylinder;
+            if (txtProp_DT_BlankType.Text == BlankType.Linear.ToString()) bc.BlankType = BlankType.Linear;
+
+            bc.PesoBruto = BomCalc.Calcule(bc, oDoc);
+
+            // Peso Bruto
+            TxtBox.SetToTextBox(txtProp_DT_PesoBruto, bc.PesoBruto + " KG");
+
+            // Blank
+            TxtBox.SetToTextBox(txtProp_DT_DimBlank, bc.Blank);
+
+            // Peso Acabado
+            TxtBox.SetToTextBox(txtProp_DT_PesoAcabado, bc.PesoAcabado + " KG");
+
+            partPaint.Area = Math.Round(mass.Area, 2);
+            partPaint.PaintType = cbxProp_DT_TipoPintura.Text;
+
+            // Área de Pintura
+            TxtBox.SetToTextBox(txtProp_DT_AreaPintura, paintHelper.SetArea(partPaint).ToString());
+
+            // Salva nas propriedades
+            InvProps.SetInvIProperties(Prop.PC_PESO_ACABADO, txtProp_DT_PesoAcabado.Text,
+                InvPropetiesGroup.CustomFields, oDoc);
+            InvProps.SetInvIProperties(Prop.MP_PESO_BRUTO, txtProp_DT_PesoBruto.Text, InvPropetiesGroup.CustomFields, oDoc);
+            InvProps.SetInvIProperties(Prop.PC_AREA_PINTURA, txtProp_DT_AreaPintura.Text, InvPropetiesGroup.CustomFields, oDoc);
+            InvProps.SetInvIProperties(Prop.PC_TIPO_PINTURA, cbxProp_DT_TipoPintura.Text, InvPropetiesGroup.CustomFields, oDoc);
+            InvProps.SetInvIProperties(Prop.PC_ACABAMENTO_PINTURA, cbxProp_DT_PinturaAcabamento.Text, InvPropetiesGroup.CustomFields, oDoc);
+
+            InvProps.SetInvIProperties(Prop.PC_ACABAMENTO_PINTURA, cbxProp_DT_PinturaAcabamento.Text, InvPropetiesGroup.CustomFields, oDoc);
+            InvProps.SetInvIProperties(Prop.PC_PINTURA_INTERNA_DIFERENTE, CheckState(checkPintura), InvPropetiesGroup.CustomFields, oDoc);
+        }
+
+        #endregion
+
+        private void tabDados_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void BtnRevClear_Click(object sender, EventArgs e)
+        {
+            txtProp_PC_NumRevisao.Clear();
+        }
+
+        private void cbxProp_DT_TipoPintura_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbxProp_DT_TipoPintura.Text == "Inteiro")
+            {
+                checkPintura.Enabled = true;
+            }
+            else
+            {
+                checkPintura.Checked = false;
+                checkPintura.Enabled = false;
+            }
+        }
+
+        private void btnAtualizarBlank_Click(object sender, EventArgs e)
+        {
+            if (_selectedDocument.DocumentType == DocumentTypeEnum.kPartDocumentObject)
+            {
+                BlankUpdate(_selectedDocument);
+            }
+            else
+            {
+                InvMsg.Msg("Para atualização do Blank é necessário selecionar uma peça (ARQUIVO IPT)." +
+                           "\nNão é possível calcular blank de uma montagem (ARQUIVO IAM).");
+            }
+        }
+
        
+
+        /// <summary>
+        /// Update do Blank do arquivo solicitado
+        /// </summary>
+        /// <param name="oDoc"></param>
+        private void BlankUpdate(Document oDoc)
+        {
+            CoreDescription cd = new CoreDescription();
+
+            SetProperties(oDoc);
+            txtProp_PC_DescCompleta.Text = UpdateBlank.Execute(txtProp_MP_Familia.Text, oDoc);
+            txtProp_DT_BlankType.Text = cd.GetDescriptionType(txtProp_MP_Familia.Text);
+
+            CalculaMateriaPrima(oDoc);
+        }
     }
 
 }
@@ -720,7 +1611,7 @@ namespace IdugelErpIntegrator
 //    /// <param name="e"></param>
 //    private void PreencherTextBoxComDadosDaMpFromNewAge(DataGridViewCellEventArgs e)
 //    {
-//        LimparTextBoxMP();
+//        LimparTextBoxMpDadosMP();
 
 //        var dataNewAgeLocal = new NEWAGE();
 
@@ -1767,7 +2658,7 @@ namespace IdugelErpIntegrator
 //        txtProp_MP_Unidade.Text = txtUnidade.Text;
 //    }
 
-//    private void LimparTextBoxMP()
+//    private void LimparTextBoxMpDadosMP()
 //    {
 //        txtCod.Clear();
 //        txtDescErp.Clear();

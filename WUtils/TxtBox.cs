@@ -14,6 +14,10 @@ namespace WUtils
             textbox.Text = valor.Replace('.', ',').Trim();
         }
 
+        public static void SetToComboBox(ComboBox comboBox, string valor)
+        {
+            comboBox.Text = valor.Replace('.', ',').Trim();
+        }
         /// <summary>
         ///     Preeche variável informada vindo de um textBox
         /// </summary>

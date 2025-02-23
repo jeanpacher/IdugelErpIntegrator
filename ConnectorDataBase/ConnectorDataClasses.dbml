@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="IDUGEL_DB" Class="ConnectorDataClassesDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=wetodell\cigam_connector;Initial Catalog=IDUGEL_DB;Integrated Security=True" SettingsObjectName="ConnectorDataBase.Properties.Settings" SettingsPropertyName="IDUGEL_DBConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.DESCRIPTION_MANAGER" Member="DESCRIPTION_MANAGERs">
+    <Type Name="DESCRIPTION_MANAGER">
+      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="NAME_DESCRIPTION" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="NAME_IPROP_FIELD" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="FAMILY_TYPE" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="SCRIPT_DESC" Type="System.String" DbType="VarChar(500)" CanBeNull="true" />
+      <Column Name="COMMENT" Type="System.String" DbType="VarChar(200)" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.View_Family" Member="View_Families">
+    <Type Name="View_Family">
+      <Column Name="FAMILIA" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.BLANK_TYPE_NAMES" Member="BLANK_TYPE_NAMEs">
+    <Type Name="BLANK_TYPE_NAME">
+      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BLANK_TYPE_NAME" Member="BLANK_TYPE_NAME1" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.DWG_CUT_FILE_MANAGER" Member="DWG_CUT_FILE_MANAGERs">
+    <Type Name="DWG_CUT_FILE_MANAGER">
+      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="DWG_CUT_FILENAME" Type="System.String" DbType="VarChar(200)" CanBeNull="true" />
+      <Column Name="DWG_CUT_BLANK_DIM" Type="System.String" DbType="VarChar(100)" CanBeNull="true" />
+      <Column Name="DWG_CUT_MP_COD" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
+      <Column Name="DWG_CUT_MP_DESC_INVENTOR" Type="System.String" DbType="VarChar(150)" CanBeNull="true" />
+      <Column Name="DWG_CUT_FILE_UPDATED" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="CREATE_BY" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="CREATE_DATE" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="UPDATE_BY" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="UPDATE_DATE" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="CUT_FILE_VERSION" Type="System.Int32" DbType="Int" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.NEWAGE" Member="NEWAGEs">
+    <Type Name="NEWAGE">
+      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CODIGO" Type="System.String" DbType="NChar(10)" CanBeNull="true" />
+      <Column Name="DESCRICAO" Type="System.String" DbType="VarChar(150)" CanBeNull="true" />
+      <Column Name="DESCRICAO_INVENTOR" Type="System.String" DbType="VarChar(150)" CanBeNull="true" />
+      <Column Name="FAMILIA" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="UNIDADE" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
+      <Column Name="FATOR" Type="System.String" DbType="VarChar(12)" CanBeNull="true" />
+      <Column Name="ESPESSURA" Type="System.String" DbType="VarChar(12)" CanBeNull="true" />
+    </Type>
+  </Table>
+</Database>

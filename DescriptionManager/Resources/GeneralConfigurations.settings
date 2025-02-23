@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DescriptionManager.Resources" GeneratedClassName="GeneralConfigurations">
+  <Profiles />
+  <Settings>
+    <Setting Name="SetBlankFieldValues" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CH_DIM_BLANK</Value>
+    </Setting>
+    <Setting Name="GetValuesFromColumn" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MP_FAMILIA</Value>
+    </Setting>
+    <Setting Name="ParamComp" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Comp</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

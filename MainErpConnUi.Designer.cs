@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainErpConnUi));
             this.dgView = new System.Windows.Forms.DataGridView();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -53,7 +53,7 @@
             this.btnCancelar = new System.Windows.Forms.Button();
             this.groupBoxComandos = new System.Windows.Forms.GroupBox();
             this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
+            this.btnAtualizarBlank = new System.Windows.Forms.Button();
             this.btnAppply = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.groupBox_PropDadosMP = new System.Windows.Forms.GroupBox();
@@ -106,7 +106,8 @@
             this.label23 = new System.Windows.Forms.Label();
             this.txtProp_RP_NomeDesenhista = new System.Windows.Forms.TextBox();
             this.tabDados = new System.Windows.Forms.TabPage();
-            this.btnApplyMp_Click = new System.Windows.Forms.Button();
+            this.btnConectarNewAge = new System.Windows.Forms.Button();
+            this.btnApplyMp = new System.Windows.Forms.Button();
             this.btnSaveMateriaPrimaToOracle = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.btnApply = new System.Windows.Forms.Button();
@@ -167,11 +168,11 @@
             // 
             this.dgView.AllowUserToAddRows = false;
             this.dgView.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.WhiteSmoke;
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.WhiteSmoke;
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle2;
             this.dgView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -201,7 +202,7 @@
             // 
             // tabPropriedades
             // 
-            this.tabPropriedades.BackColor = System.Drawing.Color.White;
+            this.tabPropriedades.BackColor = System.Drawing.Color.Transparent;
             this.tabPropriedades.Controls.Add(this.groupBox3);
             this.tabPropriedades.Controls.Add(this.groupBox2);
             this.tabPropriedades.Controls.Add(this.groupBox1);
@@ -216,7 +217,7 @@
             this.tabPropriedades.Controls.Add(this.groupBox_RespProjeto);
             this.tabPropriedades.Location = new System.Drawing.Point(4, 34);
             this.tabPropriedades.Name = "tabPropriedades";
-            this.tabPropriedades.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPropriedades.Padding = new System.Windows.Forms.Padding(3);
             this.tabPropriedades.Size = new System.Drawing.Size(1202, 563);
             this.tabPropriedades.TabIndex = 1;
             this.tabPropriedades.Text = "Propriedades";
@@ -254,12 +255,13 @@
             this.cbxProp_DT_TipoPintura.Name = "cbxProp_DT_TipoPintura";
             this.cbxProp_DT_TipoPintura.Size = new System.Drawing.Size(102, 21);
             this.cbxProp_DT_TipoPintura.TabIndex = 6;
+            this.cbxProp_DT_TipoPintura.SelectedIndexChanged += new System.EventHandler(this.cbxProp_DT_TipoPintura_SelectedIndexChanged);
             // 
             // label11
             // 
             this.label11.AutoSize = true;
             this.label11.Location = new System.Drawing.Point(6, 17);
-            this.label11.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label11.Margin = new System.Windows.Forms.Padding(3);
             this.label11.Name = "label11";
             this.label11.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label11.Size = new System.Drawing.Size(72, 16);
@@ -270,7 +272,7 @@
             // 
             this.label32.AutoSize = true;
             this.label32.Location = new System.Drawing.Point(6, 62);
-            this.label32.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label32.Margin = new System.Windows.Forms.Padding(3);
             this.label32.Name = "label32";
             this.label32.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label32.Size = new System.Drawing.Size(67, 16);
@@ -281,7 +283,7 @@
             // 
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(6, 109);
-            this.label13.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label13.Margin = new System.Windows.Forms.Padding(3);
             this.label13.Name = "label13";
             this.label13.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label13.Size = new System.Drawing.Size(95, 16);
@@ -336,7 +338,7 @@
             this.BtnReplaceAllInStructure.Size = new System.Drawing.Size(112, 40);
             this.BtnReplaceAllInStructure.TabIndex = 10;
             this.BtnReplaceAllInStructure.Text = "Copiar e Subs. Todos";
-            this.BtnReplaceAllInStructure.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.BtnReplaceAllInStructure.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.BtnReplaceAllInStructure.UseVisualStyleBackColor = true;
             // 
             // BtnSaveAndReplace
@@ -433,7 +435,7 @@
             // 
             this.groupBoxComandos.BackColor = System.Drawing.Color.White;
             this.groupBoxComandos.Controls.Add(this.button4);
-            this.groupBoxComandos.Controls.Add(this.button5);
+            this.groupBoxComandos.Controls.Add(this.btnAtualizarBlank);
             this.groupBoxComandos.Location = new System.Drawing.Point(260, 427);
             this.groupBoxComandos.Name = "groupBoxComandos";
             this.groupBoxComandos.Size = new System.Drawing.Size(249, 69);
@@ -453,18 +455,19 @@
             this.button4.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.button4.UseVisualStyleBackColor = true;
             // 
-            // button5
+            // btnAtualizarBlank
             // 
-            this.button5.Image = ((System.Drawing.Image)(resources.GetObject("button5.Image")));
-            this.button5.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button5.Location = new System.Drawing.Point(124, 18);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(112, 40);
-            this.button5.TabIndex = 6;
-            this.button5.Text = "Atualizar Blank";
-            this.button5.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.button5.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.button5.UseVisualStyleBackColor = true;
+            this.btnAtualizarBlank.Image = ((System.Drawing.Image)(resources.GetObject("btnAtualizarBlank.Image")));
+            this.btnAtualizarBlank.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.btnAtualizarBlank.Location = new System.Drawing.Point(124, 18);
+            this.btnAtualizarBlank.Name = "btnAtualizarBlank";
+            this.btnAtualizarBlank.Size = new System.Drawing.Size(112, 40);
+            this.btnAtualizarBlank.TabIndex = 6;
+            this.btnAtualizarBlank.Text = "Atualizar Blank";
+            this.btnAtualizarBlank.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnAtualizarBlank.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.btnAtualizarBlank.UseVisualStyleBackColor = true;
+            this.btnAtualizarBlank.Click += new System.EventHandler(this.btnAtualizarBlank_Click);
             // 
             // btnAppply
             // 
@@ -524,12 +527,13 @@
             this.checkMpCustomData.TabIndex = 6;
             this.checkMpCustomData.Text = "Matéria Prima Personalizada";
             this.checkMpCustomData.UseVisualStyleBackColor = true;
+            this.checkMpCustomData.CheckedChanged += new System.EventHandler(this.checkMpCustomData_CheckedChanged);
             // 
             // label30
             // 
             this.label30.AutoSize = true;
             this.label30.Location = new System.Drawing.Point(199, 64);
-            this.label30.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label30.Margin = new System.Windows.Forms.Padding(3);
             this.label30.Name = "label30";
             this.label30.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label30.Size = new System.Drawing.Size(109, 16);
@@ -540,7 +544,7 @@
             // 
             this.label28.AutoSize = true;
             this.label28.Location = new System.Drawing.Point(386, 64);
-            this.label28.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label28.Margin = new System.Windows.Forms.Padding(3);
             this.label28.Name = "label28";
             this.label28.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label28.Size = new System.Drawing.Size(74, 16);
@@ -579,7 +583,7 @@
             // 
             this.label26.AutoSize = true;
             this.label26.Location = new System.Drawing.Point(381, 13);
-            this.label26.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label26.Margin = new System.Windows.Forms.Padding(3);
             this.label26.Name = "label26";
             this.label26.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label26.Size = new System.Drawing.Size(47, 16);
@@ -604,7 +608,7 @@
             // 
             this.label21.AutoSize = true;
             this.label21.Location = new System.Drawing.Point(7, 160);
-            this.label21.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label21.Margin = new System.Windows.Forms.Padding(3);
             this.label21.Name = "label21";
             this.label21.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label21.Size = new System.Drawing.Size(202, 16);
@@ -629,7 +633,7 @@
             // 
             this.label20.AutoSize = true;
             this.label20.Location = new System.Drawing.Point(7, 112);
-            this.label20.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label20.Margin = new System.Windows.Forms.Padding(3);
             this.label20.Name = "label20";
             this.label20.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label20.Size = new System.Drawing.Size(168, 16);
@@ -654,7 +658,7 @@
             // 
             this.label27.AutoSize = true;
             this.label27.Location = new System.Drawing.Point(7, 16);
-            this.label27.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label27.Margin = new System.Windows.Forms.Padding(3);
             this.label27.Name = "label27";
             this.label27.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label27.Size = new System.Drawing.Size(79, 16);
@@ -679,7 +683,7 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Location = new System.Drawing.Point(7, 64);
-            this.label19.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label19.Margin = new System.Windows.Forms.Padding(3);
             this.label19.Name = "label19";
             this.label19.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label19.Size = new System.Drawing.Size(122, 16);
@@ -722,7 +726,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Location = new System.Drawing.Point(6, 63);
-            this.label18.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label18.Margin = new System.Windows.Forms.Padding(3);
             this.label18.Name = "label18";
             this.label18.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label18.Size = new System.Drawing.Size(104, 16);
@@ -744,7 +748,7 @@
             // 
             this.label22.AutoSize = true;
             this.label22.Location = new System.Drawing.Point(93, 16);
-            this.label22.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label22.Margin = new System.Windows.Forms.Padding(3);
             this.label22.Name = "label22";
             this.label22.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label22.Size = new System.Drawing.Size(32, 16);
@@ -766,7 +770,7 @@
             // 
             this.label31.AutoSize = true;
             this.label31.Location = new System.Drawing.Point(4, 111);
-            this.label31.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label31.Margin = new System.Windows.Forms.Padding(3);
             this.label31.Name = "label31";
             this.label31.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label31.Size = new System.Drawing.Size(126, 16);
@@ -777,7 +781,7 @@
             // 
             this.label17.AutoSize = true;
             this.label17.Location = new System.Drawing.Point(3, 16);
-            this.label17.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label17.Margin = new System.Windows.Forms.Padding(3);
             this.label17.Name = "label17";
             this.label17.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label17.Size = new System.Drawing.Size(50, 16);
@@ -837,6 +841,7 @@
             this.BtnRevClear.TabIndex = 8;
             this.BtnRevClear.Text = "Limpar Campo";
             this.BtnRevClear.UseVisualStyleBackColor = true;
+            this.BtnRevClear.Click += new System.EventHandler(this.BtnRevClear_Click);
             // 
             // checkCodDesenho
             // 
@@ -862,7 +867,7 @@
             // 
             this.label16.AutoSize = true;
             this.label16.Location = new System.Drawing.Point(6, 23);
-            this.label16.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label16.Margin = new System.Windows.Forms.Padding(3);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(101, 13);
             this.label16.TabIndex = 4;
@@ -884,7 +889,7 @@
             // 
             this.label15.AutoSize = true;
             this.label15.Location = new System.Drawing.Point(6, 158);
-            this.label15.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label15.Margin = new System.Windows.Forms.Padding(3);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(102, 13);
             this.label15.TabIndex = 4;
@@ -909,7 +914,7 @@
             // 
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(6, 113);
-            this.label14.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label14.Margin = new System.Windows.Forms.Padding(3);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(138, 13);
             this.label14.TabIndex = 4;
@@ -946,7 +951,7 @@
             // 
             this.label12.AutoSize = true;
             this.label12.Location = new System.Drawing.Point(6, 68);
-            this.label12.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label12.Margin = new System.Windows.Forms.Padding(3);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(105, 13);
             this.label12.TabIndex = 4;
@@ -970,7 +975,7 @@
             // 
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(6, 67);
-            this.label10.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label10.Margin = new System.Windows.Forms.Padding(3);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(115, 13);
             this.label10.TabIndex = 4;
@@ -980,7 +985,7 @@
             // 
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(6, 19);
-            this.label9.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label9.Margin = new System.Windows.Forms.Padding(3);
             this.label9.Name = "label9";
             this.label9.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label9.Size = new System.Drawing.Size(120, 16);
@@ -1033,7 +1038,7 @@
             // 
             this.label25.AutoSize = true;
             this.label25.Location = new System.Drawing.Point(6, 111);
-            this.label25.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label25.Margin = new System.Windows.Forms.Padding(3);
             this.label25.Name = "label25";
             this.label25.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label25.Size = new System.Drawing.Size(102, 16);
@@ -1059,7 +1064,7 @@
             // 
             this.label24.AutoSize = true;
             this.label24.Location = new System.Drawing.Point(7, 67);
-            this.label24.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label24.Margin = new System.Windows.Forms.Padding(3);
             this.label24.Name = "label24";
             this.label24.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label24.Size = new System.Drawing.Size(96, 16);
@@ -1085,7 +1090,7 @@
             // 
             this.label23.AutoSize = true;
             this.label23.Location = new System.Drawing.Point(6, 16);
-            this.label23.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.label23.Margin = new System.Windows.Forms.Padding(3);
             this.label23.Name = "label23";
             this.label23.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.label23.Size = new System.Drawing.Size(106, 16);
@@ -1110,7 +1115,8 @@
             // tabDados
             // 
             this.tabDados.BackColor = System.Drawing.Color.White;
-            this.tabDados.Controls.Add(this.btnApplyMp_Click);
+            this.tabDados.Controls.Add(this.btnConectarNewAge);
+            this.tabDados.Controls.Add(this.btnApplyMp);
             this.tabDados.Controls.Add(this.btnSaveMateriaPrimaToOracle);
             this.tabDados.Controls.Add(this.button3);
             this.tabDados.Controls.Add(this.btnApply);
@@ -1118,26 +1124,45 @@
             this.tabDados.Controls.Add(this.groupBox_MP);
             this.tabDados.Location = new System.Drawing.Point(4, 34);
             this.tabDados.Name = "tabDados";
-            this.tabDados.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabDados.Padding = new System.Windows.Forms.Padding(3);
             this.tabDados.Size = new System.Drawing.Size(1202, 563);
             this.tabDados.TabIndex = 0;
             this.tabDados.Text = "Dados Matéria Prima";
             // 
-            // btnApplyMp_Click
+            // btnConectarNewAge
             // 
-            this.btnApplyMp_Click.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnApplyMp_Click.FlatAppearance.BorderColor = System.Drawing.Color.MidnightBlue;
-            this.btnApplyMp_Click.Image = global::InvAddIn.Properties.Resources.tick;
-            this.btnApplyMp_Click.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnApplyMp_Click.Location = new System.Drawing.Point(1065, 508);
-            this.btnApplyMp_Click.Name = "btnApplyMp_Click";
-            this.btnApplyMp_Click.Size = new System.Drawing.Size(130, 30);
-            this.btnApplyMp_Click.TabIndex = 8;
-            this.btnApplyMp_Click.Text = "Aplicar Matéria Prima";
-            this.btnApplyMp_Click.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnApplyMp_Click.UseMnemonic = false;
-            this.btnApplyMp_Click.UseVisualStyleBackColor = true;
-            this.btnApplyMp_Click.Click += new System.EventHandler(this.btnApplyMp_Click_Click);
+            this.btnConectarNewAge.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnConectarNewAge.FlatAppearance.BorderColor = System.Drawing.Color.MidnightBlue;
+            this.btnConectarNewAge.Image = global::InvAddIn.Properties.Resources.arrow_circle;
+            this.btnConectarNewAge.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnConectarNewAge.Location = new System.Drawing.Point(13, 508);
+            this.btnConectarNewAge.Name = "btnConectarNewAge";
+            this.btnConectarNewAge.Size = new System.Drawing.Size(120, 30);
+            this.btnConectarNewAge.TabIndex = 9;
+            this.btnConectarNewAge.Text = "Conectar NewAge";
+            this.btnConectarNewAge.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btnConectarNewAge.UseMnemonic = false;
+            this.btnConectarNewAge.UseVisualStyleBackColor = true;
+            this.btnConectarNewAge.Click += new System.EventHandler(this.btnConectarNewAge_Click);
+            // 
+            // btnApplyMp
+            // 
+            this.btnApplyMp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnApplyMp.FlatAppearance.BorderColor = System.Drawing.Color.MidnightBlue;
+            this.btnApplyMp.Image = global::InvAddIn.Properties.Resources.tick;
+            this.btnApplyMp.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnApplyMp.Location = new System.Drawing.Point(1065, 508);
+            this.btnApplyMp.Name = "btnApplyMp";
+            this.btnApplyMp.Size = new System.Drawing.Size(130, 30);
+            this.btnApplyMp.TabIndex = 8;
+            this.btnApplyMp.Text = "Aplicar Matéria Prima";
+            this.btnApplyMp.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.DicaParaTextsBox.SetToolTip(this.btnApplyMp, "A materia prima está definida como personalizada. Para aplicar uma materia prima " +
+        "do sistema, desmarque a opção  \"Materia Prima Personalizada\" na aba Propriedades" +
+        "");
+            this.btnApplyMp.UseMnemonic = false;
+            this.btnApplyMp.UseVisualStyleBackColor = true;
+            this.btnApplyMp.Click += new System.EventHandler(this.btnApplyMp_Click_Click);
             // 
             // btnSaveMateriaPrimaToOracle
             // 
@@ -1160,7 +1185,7 @@
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button3.Image = ((System.Drawing.Image)(resources.GetObject("button3.Image")));
             this.button3.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.button3.Location = new System.Drawing.Point(98, 510);
+            this.button3.Location = new System.Drawing.Point(236, 509);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(172, 30);
             this.button3.TabIndex = 6;
@@ -1172,7 +1197,7 @@
             // btnApply
             // 
             this.btnApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnApply.Location = new System.Drawing.Point(13, 510);
+            this.btnApply.Location = new System.Drawing.Point(151, 510);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(79, 30);
             this.btnApply.TabIndex = 6;
@@ -1374,7 +1399,7 @@
             // 
             // BtnStockNumber
             // 
-            this.BtnStockNumber.Location = new System.Drawing.Point(502, 28);
+            this.BtnStockNumber.Location = new System.Drawing.Point(507, 28);
             this.BtnStockNumber.Name = "BtnStockNumber";
             this.BtnStockNumber.Size = new System.Drawing.Size(77, 23);
             this.BtnStockNumber.TabIndex = 6;
@@ -1429,9 +1454,9 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.comboBox1);
-            this.groupBox5.Location = new System.Drawing.Point(579, 19);
+            this.groupBox5.Location = new System.Drawing.Point(681, 19);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(374, 64);
+            this.groupBox5.Size = new System.Drawing.Size(272, 64);
             this.groupBox5.TabIndex = 4;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Favoritos";
@@ -1444,7 +1469,7 @@
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(6, 19);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(359, 21);
+            this.comboBox1.Size = new System.Drawing.Size(257, 21);
             this.comboBox1.TabIndex = 3;
             // 
             // groupBox4
@@ -1474,9 +1499,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.TxtFinder.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.TxtFinder.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-            this.TxtFinder.Location = new System.Drawing.Point(149, 23);
+            this.TxtFinder.Location = new System.Drawing.Point(167, 23);
             this.TxtFinder.Name = "TxtFinder";
-            this.TxtFinder.Size = new System.Drawing.Size(338, 20);
+            this.TxtFinder.Size = new System.Drawing.Size(320, 20);
             this.TxtFinder.TabIndex = 0;
             this.TxtFinder.TextChanged += new System.EventHandler(this.TxtFinder_TextChanged);
             // 
@@ -1493,13 +1518,13 @@
             // lblFileName
             // 
             this.lblFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblFileName.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.lblFileName.BackColor = System.Drawing.Color.Transparent;
             this.lblFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblFileName.ForeColor = System.Drawing.Color.OrangeRed;
-            this.lblFileName.Location = new System.Drawing.Point(417, 2);
+            this.lblFileName.Location = new System.Drawing.Point(193, 2);
             this.lblFileName.Name = "lblFileName";
             this.lblFileName.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lblFileName.Size = new System.Drawing.Size(787, 29);
+            this.lblFileName.Size = new System.Drawing.Size(1011, 29);
             this.lblFileName.TabIndex = 8;
             this.lblFileName.Text = "Nome do Arquivo";
             this.lblFileName.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1543,6 +1568,7 @@
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.CancelButton = this.btnCancelar;
             this.ClientSize = new System.Drawing.Size(1210, 601);
             this.Controls.Add(this.statusStrip1);
@@ -1550,11 +1576,15 @@
             this.Controls.Add(this.lblAlert);
             this.Controls.Add(this.tabControl1);
             this.DoubleBuffered = true;
+            this.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.ImeMode = System.Windows.Forms.ImeMode.On;
             this.MinimumSize = new System.Drawing.Size(20, 45);
             this.Name = "MainErpConnUi";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "WApps ERP Connector";
+            this.Text = "ERP Connector";
+            this.HelpButtonClicked += new System.ComponentModel.CancelEventHandler(this.MainErpConnUi_HelpButtonClicked);
             this.Load += new System.EventHandler(this.MainErpConnUi_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgView)).EndInit();
             this.tabControl1.ResumeLayout(false);
@@ -1672,7 +1702,7 @@
         private System.Windows.Forms.Button button3;
         public System.Windows.Forms.Label lblFileName;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button btnAtualizarBlank;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripProgressBar progressBar;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
@@ -1702,6 +1732,7 @@
         private System.Windows.Forms.ToolTip DicaParaTextsBox;
         private System.Windows.Forms.ComboBox TxtUnidades;
         private System.Windows.Forms.Button btnSaveMateriaPrimaToOracle;
-        private System.Windows.Forms.Button btnApplyMp_Click;
+        private System.Windows.Forms.Button btnApplyMp;
+        private System.Windows.Forms.Button btnConectarNewAge;
     }
 }

@@ -129,7 +129,7 @@ namespace InvApp
 
             #endregion
 
-            //Criação do botão EXPORTAR ARQUIVOS EM LOTE
+            //Criação do botão CADASTRO DE PRODUTO
             IPictureDisp iconeBotaoImportar32x32 = (IPictureDisp)AxHostConverter.ImagemParaPictureDisp(global::InvApp.Properties.Resources.list);
             IPictureDisp iconeBotaoImportar16x16 = (IPictureDisp)AxHostConverter.ImagemParaPictureDisp(global::InvApp.Properties.Resources.list);
 

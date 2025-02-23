@@ -1,0 +1,4 @@
+{
+    "DwgCutPath": "V:\\AutoCorte\\",
+    "BlankConfig": "FLAT PATTERN DWG?AcadVersion=2004&RebaseGeometry=True&MergeProfilesIntoPolyline=true&SimplifySplines=true&TrimCenterlinesAtContour=True&OuterProfileLayer=ContornoExterno&InteriorProfilesLayer=ContornoInterno&BendUpLayer=DobraCima&BendUpLayerColor=0;255;255&BendUpLayerLineType=37638&BendDownLayer=DobraBaixo&BendDownLayerColor=255;127;255&BendDownLayerLineType=37638&FeatureProfilesUpLayer=MarcacaoCima&FeatureProfilesUpLayerColor=0;255;0&FeatureProfilesDownLayer=MarcacaoBaixo&FeatureProfilesDownLayerColor=0;255;0&InvisibleLayers=IV_ARC_CENTERS;IV_TANGENT;IV_ROLL;IV_ROLL_TANGENT;IV_ALTREP_BACK;IV_ALTREP_FRONT;IV_TOOL_CENTER_DOWN"
+}

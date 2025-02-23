@@ -17,7 +17,7 @@ namespace IdugelErpIntegrator
     internal static class Program
     {
 
-        public static Inventor.Application invApp { get; set; } = null;
+       // public static Inventor.Application invApp { get; set; } = null;
 
         /// <summary>
         /// The main entry point for the application.
@@ -28,8 +28,9 @@ namespace IdugelErpIntegrator
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            if (Parametros.invApp == null)
-                Parametros.invApp = (Inventor.Application)System.Runtime.InteropServices.Marshal.GetActiveObject("Inventor.Application");
+            if (InvApp.StandardAddInServer.m_InvApp == null)
+                InvApp.StandardAddInServer.m_InvApp = (Inventor.Application)System.Runtime.InteropServices.Marshal.GetActiveObject("Inventor.Application");
+           //InvApp.StandardAddInServer.m_InvApp = invApp;
             Application.Run(new MainErpConnUi());
 
 

@@ -1,0 +1,42 @@
+[
+  {
+    "Folha": "A4",
+    "BorderName": "Formato IDUGEL - A4",
+    "PageOrientation": 10243,
+    "SheetSize": 9997,
+    "ToleranceTablePosition": [11.4, 5.6],
+    "PartsListPosition": [20.3, 11.16]
+  },
+  {
+    "Folha": "A3",
+    "BorderName": "Formato IDUGEL - A3",
+    "PageOrientation": 10242,
+    "SheetSize": 9996,
+    "ToleranceTablePosition": [14.6, 1.6],
+    "PartsListPosition": [41.3, 9.36]
+  },
+  {
+    "Folha": "A2",
+    "BorderName": "Formato IDUGEL - A2",
+    "PageOrientation": 10242,
+    "SheetSize": 9995,
+    "ToleranceTablePosition": [32, 1.6],
+    "PartsListPosition": [58.7, 9.36]
+  },
+  {
+    "Folha": "A1",
+    "BorderName": "Formato IDUGEL - A1",
+    "PageOrientation": 10242,
+    "SheetSize": 9994,
+    "ToleranceTablePosition": [56.4, 1.9],
+    "PartsListPosition": [83.1, 9.66]
+  },
+  {
+    "Folha": "A0",
+    "BorderName": "Formato IDUGEL - A0",
+    "PageOrientation": 10242,
+    "SheetSize": 9993,
+    "ToleranceTablePosition": [91.2, 1.9],
+    "PartsListPosition": [117.9, 9.66]
+  }
+]
