@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Inventor;
 using System.Data;
-using Oracle.ManagedDataAccess.Client;
+//using Oracle.ManagedDataAccess.Client;
 using PaintManager;
 using System.Linq.Expressions;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -17,6 +17,8 @@ using WUtils;
 using Prop = CadModelProperties.Resources.ResIproperties;
 using DescriptionManager;
 using WConnectorModels;
+using OracleBancoDados;
+using InvAddIn;
 
 
 
@@ -50,7 +52,7 @@ namespace IdugelErpIntegrator
             //InitializeDataGrid();
             _iProperties = new CadProperties.CadModelProperties();
             //dataNewAge = new NEWAGE();
-            NamesAutoComplete();
+            //NamesAutoComplete();
             //dataNewAge = ErpData.FirstOrDefault(d => d.CODIGO == _iProperties.MpCod);
         }
         private void NamesAutoComplete()
@@ -65,9 +67,16 @@ namespace IdugelErpIntegrator
         }
         private async void MainErpConnUi_Load(object sender, EventArgs e)
         {
+
+            if (InvApp.StandardAddInServer.m_InvApp.Documents.Count == 0)
+            {
+                MessageBox.Show("Nenhum documento ativo");
+                return;
+            }
+
             // Load connection asynchronously to avoid blocking UI
 
-            if (OracleHelper.GetConnection())
+            if (OracleBancoDados.OracleHelper.GetConnection())
                 this.Text = this.Text + " -  CONECTADO";
             //await Task.Run(() => OracleHelper.GetConnection());
 
@@ -107,8 +116,8 @@ namespace IdugelErpIntegrator
             NeedSaveToNewAge = false;
             PreencherComboBoxUnidades();
 
-            _selectedDocument = InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument;
-            lblFileName.Text = _selectedDocument.FullFileName.Split('\\').Last();
+            // _selectedDocument = InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument;
+            //lblFileName.Text = _selectedDocument.FullFileName.Split('\\').Last();
 
 
         }
@@ -131,7 +140,7 @@ namespace IdugelErpIntegrator
 
                 lblStatus.Text = "Carregando Dados da Peça...";
 
-                GetPropertiesToTextBox();
+                await Task.Run(() => GetPropertiesToTextBox());
 
                 //Task getProper = new Task(GetPropertiesToTextBox);
                 //getProper.Start();
@@ -206,6 +215,18 @@ namespace IdugelErpIntegrator
         }
         private void btnApplyMp_Click_Click(object sender, EventArgs e)
         {
+
+            if (CheckPreRequisitsToApplyMP(sender, e))
+            {
+                PreencherTextBoxPropriedadesDadosMP();
+                ApplyMaterialExecution();
+            }
+
+
+        }
+
+        private bool CheckPreRequisitsToApplyMP(object sender, EventArgs e)
+        {
             if (checkMpCustomData.Checked)
             {
                 DialogResult result = MessageBox.Show("A Matéria Prima está definida como CUSTOM.\n" +
@@ -213,33 +234,73 @@ namespace IdugelErpIntegrator
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                 if (result == DialogResult.No)
-                    return;
+                    return false;
 
                 checkMpCustomData.Checked = false;
             }
 
-
             if (NeedSaveToNewAge)
             {
                 DialogResult Result = MessageBox.Show("Existem alterações não salvas no NewAge. Deseja Salvar as alterações?", "Salvar Alterações", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (Result == DialogResult.No) { return; }
+                if (Result == DialogResult.No) { return false; }
 
                 if (OracleHelper.connection.State == ConnectionState.Closed)
                 {
                     MessageBox.Show("Sem conexão com o NewAge");
-                    return;
+                    return false;
                 }
                 btnSaveMateriaPrimaToOracle_Click(sender, e);
             }
 
 
-            PreencherTextBoxPropriedadesDadosMP();
+            List<string> erros = new List<string>();
 
-            ApplyMaterialExecution();
+            // ANALISANDO O CAMPO ESPESSURA SE POSSUI VALOR E O VALOR É COERENTE
+            if (string.IsNullOrEmpty(txtEspessura.Text))
+                erros.Add("Valor da espessura está em branco");
+            else
+            {
+                if (!Double.TryParse(txtEspessura.Text, out double espessura))
+                    erros.Add("Espessura não é um número");
+                else
+                {
+                    if (espessura <= 0) erros.Add("Espessura é menor ou igual a zero");
+                    if (espessura >= 30) erros.Add("Espessura parece muito grande");
+                }
+            }
+
+            // ANALISANDO O CAMPO FATOR UNIDADE SE POSSUI VALOR E O VALOR É COERENTE
+            if (string.IsNullOrEmpty(txtFatorUnidade.Text))
+                erros.Add("Fator da Unidade está em branco");
+            else
+            {
+                if (!Double.TryParse(txtFatorUnidade.Text, out double fatorunidade))
+                    erros.Add("Fator Unidade não é um número");
+                else
+                {
+                    if (fatorunidade <= 0) erros.Add("Fator da Unidade é menor ou igual a zero");
+                    if (fatorunidade >= 30) erros.Add("Fator Unidade parece muito grande");
+                }
+            }
+
+            // ANALISANDO O CAMPO DESCRICAO DO INVENTOR SE POSSUI VALOR
+            if (string.IsNullOrEmpty(txtDescInventor.Text)) erros.Add("O campo descrição do Inventor está em branco");
+
+            if (erros.Count > 0)
+            {
+                DialogResult result = CustomMessageBox.ShowCustomMessage(erros, "Atenção");
+
+                if (result == DialogResult.No) return false;
+            }
+
+            
+
+            return true;
+
 
         }
         private void TxtFinder_TextChanged(object sender, EventArgs e)
-       {
+        {
             FiltrarDados();
         }
         private void dgView_SelectionChanged(object sender, EventArgs e)
@@ -292,7 +353,6 @@ namespace IdugelErpIntegrator
 
             UpdateActiveFile();
         }
-
         private bool ApplyMaterial()
         {
             if (_selectedDocument == null)
@@ -324,7 +384,6 @@ namespace IdugelErpIntegrator
             return false;
         }
 
-
         /// <summary>
         ///     comando para aplicar dados dentro de uma Transaction
         /// </summary>
@@ -350,7 +409,6 @@ namespace IdugelErpIntegrator
                 trx.Abort();
             }
         }
-
         private static void UpdateActiveFile()
         {
             if (InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument.RequiresUpdate)
@@ -358,7 +416,6 @@ namespace IdugelErpIntegrator
                 InvApp.StandardAddInServer.m_InvApp.ActiveEditDocument.Update2(true);
             }
         }
-
         private void SetProperties()
         {
             try
@@ -416,7 +473,6 @@ namespace IdugelErpIntegrator
                 );
             }
         }
-
 
         /// <summary>
         ///     Carrega os dados no iProperties
@@ -483,7 +539,6 @@ namespace IdugelErpIntegrator
 
         }
 
-
         /// <summary>
         ///     Define a espessura da chapa conforme a matéria prima
         /// </summary>
@@ -508,7 +563,6 @@ namespace IdugelErpIntegrator
             InvSheetMetal.SetThickness(value, oDoc);
         }
 
-
         /// <summary>
         ///     Método para verificar se o material novo selecionad já foi aplicado
         /// </summary>
@@ -519,8 +573,8 @@ namespace IdugelErpIntegrator
         }
         #endregion
 
-
         #region MetodosValidação
+        
         private void ValidateNumericTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Allow only numeric input, control keys, and comma for decimals
@@ -540,7 +594,6 @@ namespace IdugelErpIntegrator
             }
             return true;
         }
-
         private Document VerifyDocSelected()
         {
 
@@ -574,8 +627,8 @@ namespace IdugelErpIntegrator
                     if (doc.GetType() is ComponentOccurrence)
                     {
 
-                    ComponentOccurrence occur = (ComponentOccurrence)doc;
-                    return occur.Definition.Document as Document;
+                        ComponentOccurrence occur = (ComponentOccurrence)doc;
+                        return occur.Definition.Document as Document;
                     }
                 }
                 catch (Exception e)
@@ -593,7 +646,7 @@ namespace IdugelErpIntegrator
         private void FiltrarDados()
         {
 
-            if (OracleHelper.connection.State == ConnectionState.Closed) return;
+            if (OracleBancoDados.OracleHelper.connection.State == ConnectionState.Closed) return;
 
             string txtFinder = TxtFinder.Text.Trim();
             if (txtFinder.Length <= 2)
@@ -623,7 +676,6 @@ namespace IdugelErpIntegrator
             TxtUnidades.Items.Clear(); // Limpa os itens anteriores
             TxtUnidades.Items.AddRange(unidades.ToArray());
         }
-
         public void DefineReadWriteMpProperties(bool rw)
         {
             txtProp_MP_Familia.ReadOnly = !rw;
@@ -821,7 +873,6 @@ namespace IdugelErpIntegrator
             }
 
         }
-
         private void GetPropertiesToTextBox(Document oDoc)
         {
             _iProperties = _iProperties.GetAllCadModelProperties(oDoc);
@@ -1122,8 +1173,6 @@ namespace IdugelErpIntegrator
                            "\nNão é possível calcular blank de uma montagem (ARQUIVO IAM).");
             }
         }
-
-       
 
         /// <summary>
         /// Update do Blank do arquivo solicitado

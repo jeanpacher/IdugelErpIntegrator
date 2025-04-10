@@ -3,9 +3,7 @@ using Microsoft.Win32;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-//using static System.Net.Mime.MediaTypeNames;
 using System.Drawing;
-using IdugelErpIntegrator;
 using Inventor;
 
 
@@ -151,8 +149,8 @@ namespace InvApp
 
         void CarregarUI_NewAgeConnector(NameValueMap Content)
         {
-            IdugelErpIntegrator.MainErpConnUi mainErpConnUi = new IdugelErpIntegrator.MainErpConnUi();
-            ShowFormControl.ShowModelessForm(mainErpConnUi);
+            //IdugelErpIntegrator.MainErpConnUi mainErpConnUi = new IdugelErpIntegrator.MainErpConnUi();
+            //ShowFormControl.ShowModelessForm(mainErpConnUi);
         }
 
 

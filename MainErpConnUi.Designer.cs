@@ -1133,7 +1133,7 @@
             // 
             this.btnConectarNewAge.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnConectarNewAge.FlatAppearance.BorderColor = System.Drawing.Color.MidnightBlue;
-            this.btnConectarNewAge.Image = global::InvAddIn.Properties.Resources.arrow_circle;
+            this.btnConectarNewAge.Image = global::MainErpIntegration.Properties.Resources.arrow_circle;
             this.btnConectarNewAge.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnConectarNewAge.Location = new System.Drawing.Point(13, 508);
             this.btnConectarNewAge.Name = "btnConectarNewAge";
@@ -1149,7 +1149,7 @@
             // 
             this.btnApplyMp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnApplyMp.FlatAppearance.BorderColor = System.Drawing.Color.MidnightBlue;
-            this.btnApplyMp.Image = global::InvAddIn.Properties.Resources.tick;
+            this.btnApplyMp.Image = global::MainErpIntegration.Properties.Resources.tick;
             this.btnApplyMp.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnApplyMp.Location = new System.Drawing.Point(1065, 508);
             this.btnApplyMp.Name = "btnApplyMp";
@@ -1168,7 +1168,7 @@
             // 
             this.btnSaveMateriaPrimaToOracle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSaveMateriaPrimaToOracle.FlatAppearance.BorderColor = System.Drawing.Color.MidnightBlue;
-            this.btnSaveMateriaPrimaToOracle.Image = global::InvAddIn.Properties.Resources.save_first;
+            this.btnSaveMateriaPrimaToOracle.Image = global::MainErpIntegration.Properties.Resources.save_first;
             this.btnSaveMateriaPrimaToOracle.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnSaveMateriaPrimaToOracle.Location = new System.Drawing.Point(929, 508);
             this.btnSaveMateriaPrimaToOracle.Name = "btnSaveMateriaPrimaToOracle";

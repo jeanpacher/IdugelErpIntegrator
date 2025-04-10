@@ -18,7 +18,7 @@
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>InvAddIn</RootNamespace>
+    <RootNamespace>MainErpIntegration</RootNamespace>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
     <StartupObject>
     </StartupObject>
@@ -46,7 +46,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\ErpConnector\</OutputPath>
+    <OutputPath>C:\IdugelApp\IntegracaoNewAge\</OutputPath>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
@@ -64,10 +64,11 @@
     <RegisterForComInterop>false</RegisterForComInterop>
     <RemoveIntegerChecks>false</RemoveIntegerChecks>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -116,7 +117,7 @@
       <HintPath>..\..\..\..\..\Program Files\Autodesk\Autodesk Vault 2023 SDK\bin\x64\Autodesk.DataManagement.Client.Framework.Vault.dll</HintPath>
     </Reference>
     <Reference Include="Autodesk.DataManagement.Client.Framework.Vault.Forms">
-      <HintPath>..\..\..\..\..\Program Files\Autodesk\Autodesk Vault 2023 SDK\bin\x64\Autodesk.DataManagement.Client.Framework.Vault.Forms.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\Autodesk Vault 2023 SDK\bin\x64\Autodesk.DataManagement.Client.Framework.Vault.Forms.dll</HintPath>
     </Reference>
     <Reference Include="Autodesk.Inventor.Interop, Version=27.5.0.0, Culture=neutral, PublicKeyToken=d84147f8b4276564, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -124,24 +125,24 @@
       <HintPath>..\..\..\..\..\Program Files\Autodesk\Inventor 2023\Bin\Public Assemblies\Autodesk.Inventor.Interop.dll</HintPath>
     </Reference>
     <Reference Include="BomCore">
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\BomCore\BomCore.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\BomCore\BomCore.dll</HintPath>
     </Reference>
     <Reference Include="CadModelProperties">
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\CADModelProperties\CadModelProperties.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\CADModelProperties\CadModelProperties.dll</HintPath>
     </Reference>
     <Reference Include="ConnectorDataBase">
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\DescriptionManager\ConnectorDataBase.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\DescriptionManager\ConnectorDataBase.dll</HintPath>
     </Reference>
     <Reference Include="DescriptionManager">
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\DescriptionManager\DescriptionManager.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\DescriptionManager\DescriptionManager.dll</HintPath>
     </Reference>
     <Reference Include="InvApp, Version=1.0.9123.1130, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\InventorServer\InvApp.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\InventorServer\InvApp.dll</HintPath>
     </Reference>
     <Reference Include="InvUtils, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\InvUtils\InvUtils.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\InvUtils\InvUtils.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
@@ -149,12 +150,16 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Oracle.ManagedDataAccess, Version=4.122.23.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
-      <HintPath>packages\Oracle.ManagedDataAccess.23.5.1\lib\net472\Oracle.ManagedDataAccess.dll</HintPath>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.122.19.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="OracleBancoDados">
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\Oracle\OracleBancoDados.dll</HintPath>
     </Reference>
     <Reference Include="PainManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\PaintManager\PainManager.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\PaintManager\PainManager.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
@@ -195,16 +200,18 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WConnectorModels">
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\WConnectorModels\WConnectorModels.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\WConnectorModels\WConnectorModels.dll</HintPath>
     </Reference>
     <Reference Include="WUtils">
-      <HintPath>..\..\..\..\..\InventorCustomAddins\IdugelNewAgeIntegration\WUtils\WUtils.dll</HintPath>
+      <HintPath>C:\InventorCustomAddins\IdugelNewAgeIntegration\WUtils\WUtils.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppConfig.cs" />
     <Compile Include="CoreApplication\AssemblyInfo.cs">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CustomMessageBox.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Logger.cs" />
     <Compile Include="MainErpConnUi.cs">
@@ -213,7 +220,6 @@
     <Compile Include="MainErpConnUi.Designer.cs">
       <DependentUpon>MainErpConnUi.cs</DependentUpon>
     </Compile>
-    <Compile Include="OracleHelper.cs" />
     <Compile Include="Parametros.cs" />
     <Compile Include="CoreApplication\Program.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -230,12 +236,6 @@
     <None Include="CoreApplication\Autodesk.IdugelErpIntegrator.Inventor.addin" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CoreApplication\Oracle.DataAccess.Common.Configuration.Section.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="CoreApplication\Oracle.ManagedDataAccess.Client.Configuration.Section.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="CoreApplication\packages.config" />
     <None Include="Json\AppConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -305,15 +305,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\tick-red.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\OracleConnection\OracleConnection.csproj">
-      <Project>{4f25a268-ae0d-4969-8cbc-30d41c4eeb0f}</Project>
-      <Name>OracleConnection</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

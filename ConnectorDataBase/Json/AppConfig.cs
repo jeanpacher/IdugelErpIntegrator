@@ -37,9 +37,10 @@ namespace ConnectorDataBase.Json
 
         public static List<string> GetNames()
         {
-            var appConfig = JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(GetAppPath + @"\AppConfig.json"));
+            //var appConfig = JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(GetAppPath + @"\AppConfig.json"));
 
-            return appConfig.Names;
+            return null;
+            //return appConfig.Names;
         }
 
         public static string GetWebPortalPath()
